@@ -1,0 +1,12 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-Cors
+Flask-RESTful
+PyJWT
+Werkzeug
+pymysql
+mysql-connector-python
+python-dotenv
+requests
+
