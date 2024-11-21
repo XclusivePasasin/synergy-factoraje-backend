@@ -1,14 +1,14 @@
 # sinergy-factoraje-backend
 Factoring is a financial service that allows suppliers to receive advance payments on their outstanding invoices in exchange for an agreed discount. This system facilitates cash flow for suppliers by advancing the payment of their accounts receivable without waiting for established deadlines.
 
-## Installation
+## Installation of dependencies
 In order to install the project, we will create a .venv to install the dependencies
 
 ### install virtualenv
 ```bash
   pip install virtualenv
 ```
-# In case of error in the installation of virtualenv
+### In case of error in the installation of virtualenv
 ```bash
   Set-ExecutionPolicy Bypass -Scope Process
 ```
@@ -31,4 +31,17 @@ In order to install the project, we will create a .venv to install the dependenc
 ### Deactivate the virtual environment
 ```bash
   deactivate 
+```
+
+## Migrations of the database
+if you want to create a migration, you must run the following commands
+
+### Create a migration
+```bash
+  flask db migrate
+```
+
+### Run migrations
+```bash
+  flask db upgrade
 ```
