@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronto Pago</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Estimado/a {{ nombreEmpresa }},</h1>
+        <p>
+            Como Grupo ICC nos complace informarle que su factura ingresada al sistema ha sido aprobada para una opción
+            de pronto pago a través de nuestro socio comercial:
+            <strong>Synergy Financial Corp.</strong>
+        </p>
+        <h2>Detalle de la Operación</h2>
+        <ul>
+            <li><strong>Factura Nº:</strong> {{ noFactura }}</li>
+            <li><strong>Monto de la Factura:</strong> ${{ monto }}</li>
+            <li><strong>Fecha de Otorgamiento:</strong> {{ fechaOtorgamiento }}</li>
+            <li><strong>Fecha de Vencimiento:</strong> {{ fechaVencimiento }}</li>
+            <li><strong>Días de Crédito:</strong> {{ diasCredito }} días</li>
+        </ul>
+        <p>
+            Para conocer el desglose detallado del factoraje, presione el botón a continuación:
+        </p>
+        <div class="button-container">
+            <a href="{{ linkBoton }}" class="button">Aplicar a Pronto Pago</a>
+        </div>
+
+        <p>
+            Recuerde que puede solicitar el pago adelantado en cualquier momento, y el descuento se calculará en base a
+            los días faltantes para el pago original.
+        </p>
+        <p>Atentamente,<br>Synergy Financial Corp<br>Vanessa Chicas<br>7830-2983</p>
+    </div>
+</body>
+
+</html>
