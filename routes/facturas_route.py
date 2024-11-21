@@ -1,27 +1,12 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from utils.metricas import metrica_factura
 from datetime import datetime
 from models.parametros import Parametro
 from models.solicitudes import Solicitud
 from utils.db import db
+from utils.response import response_success, response_error
 
 facturas_bp = Blueprint('factura', __name__)
-
-def response_success(data, message="Operación exitosa", code=0, http_status=200):
-    return jsonify({
-        "data": data,
-        "message": message,
-        "code": code,
-        "http_status": http_status
-    }), http_status
-
-def response_error(message, code=1, http_status=400):
-    return jsonify({
-        "data": None,
-        "message": message,
-        "code": code,
-        "http_status": http_status
-    }), http_status
 
 @facturas_bp.route('/obtener-detalle-factura', methods=['POST'])
 def obtener_detalle_factura():
