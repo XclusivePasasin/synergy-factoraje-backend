@@ -16,7 +16,9 @@ from models.parametros import Parametro
 from models.desembolsos import Desembolso
 # Rutas
 from routes.envio_correo import email_bp  
-from routes.facturas import facturas_bp
+from routes.facturas_route import facturas_bp
+from routes.usuario_route import usuarios_bp
+
 
 def create_app():
     app = Flask(__name__)
@@ -27,6 +29,8 @@ def create_app():
 
     app.register_blueprint(email_bp, url_prefix='/api/email')
     app.register_blueprint(facturas_bp, url_prefix='/api/factura')
+    app.register_blueprint(usuarios_bp, url_prefix='/api/usuario')
+
     return app
 
 if __name__ == '__main__':

@@ -1,26 +1,21 @@
 import hashlib
 import re
-from flask import jsonify
 from flask import current_app
 from models.usuarios import Usuario
 from models.roles import Rol
 from utils.db import db
+from utils.response import response_success, response_error
 
 
 class UsuarioService:
     @staticmethod
     def create_user(data):
-        """
-        Crea un nuevo usuario con una contraseña temporal hasheada usando hashlib.
-        :param data: Diccionario con los datos del usuario.
-        :return: Respuesta con los detalles del usuario creado o error.
-        """
         try:
             # Validar los campos requeridos
             campos_requeridos = ['nombre_completo', 'email', 'cargo', 'id_rol']
             for campo in campos_requeridos:
                 if campo not in data:
-                    return jsonify({'error': f'El campo {campo} es obligatorio'}), 400
+                    return response_error(f"El campo {campo} es obligatorio", http_status=400)
 
             nombre_completo = data['nombre_completo']
             email = data['email']
@@ -29,17 +24,17 @@ class UsuarioService:
 
             # Validar longitud y formato del correo electrónico
             if len(email) < 10 or len(email) > 100 or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-                return jsonify({'error': 'El formato o longitud del correo electrónico no es válido'}), 400
+                return response_error("El formato o longitud del correo electrónico no es válido", http_status=400)
 
             # Validar que el rol existe
             rol = Rol.query.get(id_rol)
             if not rol:
-                return jsonify({'error': 'El rol especificado no existe'}), 404
+                return response_error("El rol especificado no existe", http_status=404)
 
             # Validar que el correo no esté registrado
             usuario_existente = Usuario.query.filter_by(email=email).first()
             if usuario_existente:
-                return jsonify({'error': 'El correo ya está registrado'}), 409
+                return response_error("El correo ya está registrado", http_status=409)
 
             # Generar contraseña temporal
             temp_password = UsuarioService.generate_temp_password()
@@ -71,19 +66,14 @@ class UsuarioService:
                 "cargo": nuevo_usuario.cargo,
                 "id_rol": nuevo_usuario.id_rol
             }
-            return jsonify(respuesta), 201
+            return response_success(respuesta, "Usuario creado exitosamente", http_status=201)
         except Exception as e:
             # Revertir cambios en caso de error
             db.session.rollback()
-            return jsonify({'error': str(e)}), 500
+            return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
 
     @staticmethod
     def generate_temp_password(length=10):
-        """
-        Genera una contraseña temporal aleatoria.
-        :param length: Longitud de la contraseña.
-        :return: Contraseña generada.
-        """
         import string
         import random
         caracteres = string.ascii_letters + string.digits
