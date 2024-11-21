@@ -15,7 +15,7 @@ from models.menus import Menu
 from models.parametros import Parametro
 from models.desembolsos import Desembolso
 # Rutas
-from routes.envio_correo import email_bp  
+from routes.email_route import email_bp  
 from routes.facturas_route import facturas_bp
 from routes.usuario_route import usuarios_bp
 
