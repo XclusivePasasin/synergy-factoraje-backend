@@ -7,6 +7,7 @@ class Solicitud(db.Model):
     contacto = db.Column(db.String(255))
     email = db.Column(db.String(255))
     descuento_app = db.Column(db.Numeric(10, 2))
+    cargo = db.Column(db.String(255))
     iva = db.Column(db.Numeric(10, 2))
     subtotal = db.Column(db.Numeric(10, 2))
     total = db.Column(db.Numeric(10, 2))
