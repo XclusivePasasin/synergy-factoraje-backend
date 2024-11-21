@@ -5,10 +5,12 @@ from models.parametros import Parametro
 from models.solicitudes import Solicitud
 from utils.db import db
 from utils.response import response_success, response_error
+from utils.interceptor import token_required
 
 facturas_bp = Blueprint('factura', __name__)
 
 @facturas_bp.route('/obtener-detalle-factura', methods=['POST'])
+@token_required
 def obtener_detalle_factura():
     try:
         datos = request.json
@@ -64,6 +66,7 @@ def obtener_detalle_factura():
 
 
 @facturas_bp.route('/solicitar-pago-factura', methods=['POST'])
+@token_required
 def solicitar_pago_factura():
     try:
         datos = request.json

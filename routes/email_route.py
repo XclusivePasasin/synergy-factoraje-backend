@@ -1,9 +1,11 @@
 from flask import Blueprint, jsonify, request
 from services.email_service import generar_plantilla, enviar_correo
+from utils.interceptor import token_required
 
 email_bp = Blueprint('email', __name__)
 
 @email_bp.route('/enviar-email', methods=['POST'])
+@token_required
 def enviar_email():
     try:
         # Obtenemos JSON de la petición
@@ -30,4 +32,3 @@ def enviar_email():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# @email_bp.route('/obtener-metricas', methods=['POST'])
