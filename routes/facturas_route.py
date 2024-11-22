@@ -91,12 +91,12 @@ def solicitar_pago_factura():
         # Validar que la factura exista por no_factura
         factura_existente = Factura.query.filter_by(no_factura=facturas_data['no_factura']).first()
         if not factura_existente:
-            return response_error("La factura proporcionada no existe en la base de datos", http_status=422)
+            return response_error("La solicitud proporcionada no existe en la base de datos", http_status=422)
 
         # Validar que la solicitud no exista ya para esa factura
         solicitud_existente = Solicitud.query.filter_by(id_factura=factura_existente.id).first()
         if solicitud_existente:
-            return response_error("La factura ya fue procesada", http_status=409)
+            return response_error("La solicitud ya fue procesada", http_status=409)
 
         # Validar formato de fecha
         try:
