@@ -31,7 +31,7 @@ def obtener_detalle_factura():
             return response_error("La fecha de vencimiento ya pasó", http_status=422)
 
         # Obtener el parámetro de interés anual
-        parametro = Parametro.query.first()
+        parametro = Parametro.query.filter_by(clave='INT_AN_PP').first()
         if not parametro:
             return response_error("No se encontró ningún parámetro en la tabla", http_status=500)
 
@@ -100,7 +100,7 @@ def solicitar_pago_factura():
 
         # Validar formato de fecha
         try:
-            fecha_vencimiento = datetime.strptime(facturas_data['fecha_vencimiento'], "%d/%m/%Y")
+            fecha_vencimiento = datetime.strptime(facturas_data['fecha_vencimiento'], "%d/%m/%<")
         except ValueError:
             return response_error("Formato de fecha inválido. Use DD/MM/YYYY", http_status=422)
 
