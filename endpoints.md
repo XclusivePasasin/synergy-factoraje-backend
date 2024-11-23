@@ -27,33 +27,33 @@
 ## Endpoint Solicitud de Pago
 
 ### **Obtener detalles pronto pago de la factura**
-**Endpoint:** `POST /api/factura/obtener-detalle-factura`
+**Endpoint:** `GET /api/factura/obtener-detalle-factura?no_factura=555`
 **Descripción:** Recibe un JSON con los datos de la factura que se desea obtener los detalles de la factura y devuelve un JSON con los resultados de la factura.
 
 **Request Body:**
 ```json
-{
-    "cliente": "Antoni Verde",
-    "id_factura": 12345,
-    "fecha_otorgamiento": "20/12/2024",
-    "fecha_vencimiento": "18/02/2025",
-    "monto_factura": 15000
-}
+
 ```
 
 **Response:**
 ```json
 {
-    "pronto_pago": 75.0,
-    "iva": 1950.0,
-    "subtotal_descuento": 2025.0,
-    "total_a_recibir": 12975.0,
-    "cliente": "Antoni Verde",
-    "id_factura": 12345,
-    "dias_restantes": 60,
-    "fecha_otorgamiento": "20/12/2024",
-    "fecha_vencimiento": "18/02/2025",
-    "monto_factura": 15000
+    "code": 0,
+    "data": {
+        "factura": {
+            "cliente": "Clobi Technologies S.A. de C.V.",
+            "dias_restantes": 87,
+            "fecha_otorgamiento": "20/11/2024",
+            "fecha_vencimiento": "18/02/2025",
+            "iva": 84.83,
+            "monto_factura": 15000.0,
+            "no_factura": "555",
+            "pronto_pago": 652.5,
+            "subtotal_descuento": 737.33,
+            "total_a_recibir": 14262.67
+        }
+    },
+    "message": "Detalle de factura obtenido correctamente"
 }
 ```
 
@@ -66,9 +66,9 @@
 **Request Body:**
 ```json
 {
-    "nombre_completo": "Juan Pérez",
-    "email": "juan.perez@example.com",
-    "cargo": "Administrador",
+    "nombre_completo": "Julian Zan",
+    "email": "julian.zan4@example.com",
+    "cargo": "Gerente",
     "id_rol": 1
 }
 
@@ -77,25 +77,24 @@
 **Response (success):**
 ```json
 {
+    "code": 0,
     "data": {
-        "usuario_id": 1,
-        "nombre_completo": "Juan Pérez",
-        "email": "juan.perez@example.com",
-        "cargo": "Administrador",
-        "id_rol": 1
+        "cargo": "Gerente",
+        "email": "julian.zan5@example.com",
+        "id_rol": 1,
+        "nombre_completo": "Julian Zan",
+        "usuario_id": 5
     },
-    "message": "Usuario creado exitosamente",
-    "code": 0
+    "message": "Usuario creado exitosamente"
 }
 ```
 **Response (error):**
 ```json
 {
+    "code": 1,
     "data": null,
-    "message": "El correo ya está registrado",
-    "code": 1
+    "message": "El correo ya está registrado"
 }
-
 ```
 
 ### **Iniciar Sesión**
@@ -114,22 +113,22 @@
 **Response (success):**
 ```json
 {
+    "code": 0,
     "data": {
-        "usuario_id": 1,
-        "nombre_completo": "Juan Pérez",
-        "email": "juan.perez@example.com",
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "email": "julian.zan3@example.com",
+        "nombre_completo": "Julian Zan",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bGlhbi56YW4zQGV4YW1wb...",
+        "usuario_id": 3
     },
-    "message": "Inicio de sesión exitoso",
-    "code": 0
+    "message": "Inicio de sesión exitoso"
 }
 ```
 **Response (error):**
 ```json
 {
+    "code": 1,
     "data": null,
-    "message": "El usuario no existe",
-    "code": 1
+    "message": "El usuario no existe"
 }
 ```
 
@@ -150,21 +149,21 @@
 **Response (success):**
 ```json
 {
+    "code": 0,
     "data": {
-        "usuario_id": 1,
-        "nombre_completo": "Juan Pérez",
-        "email": "juan.perez@example.com",
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "email": "julian.zan3@example.com",
+        "nombre_completo": "Julian Zan",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9....",
+        "usuario_id": 3
     },
-    "message": "Token generado exitosamente",
-    "code": 0
+    "message": "Token generado exitosamente"
 }
 ```
 **Response (error):**
 ```json
 {
+    "code": 1,
     "data": null,
-    "message": "El campo 'email' es obligatorio",
-    "code": 1
+    "message": "El usuario no existe"
 }
 ```
