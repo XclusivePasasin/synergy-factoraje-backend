@@ -100,7 +100,7 @@ def solicitar_pago_factura():
 
         # Validar formato de fecha
         try:
-            fecha_vencimiento = datetime.strptime(facturas_data['fecha_vencimiento'], "%d/%m/%<")
+            fecha_vencimiento = datetime.strptime(facturas_data['fecha_vencimiento'], "%d/%m/%Y")
         except ValueError:
             return response_error("Formato de fecha inválido. Use DD/MM/YYYY", http_status=422)
 
@@ -115,7 +115,7 @@ def solicitar_pago_factura():
         # Crear la nueva solicitud
         nueva_solicitud = Solicitud(
             nombre_cliente=facturas_data['cliente'],
-            contacto=data['nombre_solicitante'],  # Usar el campo nombre_solicitante como contacto
+            contacto=data['nombre_solicitante'],  
             email=data['correo_electronico'],
             cargo=data['cargo'],
             descuento_app=facturas_data['pronto_pago'],
@@ -123,7 +123,8 @@ def solicitar_pago_factura():
             subtotal=facturas_data['subtotal_descuento'],
             total=facturas_data['total_a_recibir'],
             fecha_solicitud=fecha_actual,
-            id_factura=factura_existente.id  # Relacionar con el ID de la factura encontrada
+            id_factura=factura_existente.id,
+            id_estado=1 # Estado de la solicitud: Pendiente
         )
 
         db.session.add(nueva_solicitud)
