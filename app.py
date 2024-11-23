@@ -1,6 +1,5 @@
 from flask import Flask
-from flask_migrate import Migrate
-from utils.db import db
+from extensions import db, migrate
 # Modelos
 from models.usuarios import Usuario
 from models.facturas import Factura
@@ -14,6 +13,8 @@ from models.permisos import Permiso
 from models.menus import Menu
 from models.parametros import Parametro
 from models.desembolsos import Desembolso
+#Seeds
+from seeds.seeds import init_app
 # Rutas
 from routes.email_route import email_bp  
 from routes.facturas_route import facturas_bp
@@ -24,9 +25,12 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object('config.Config')
 
+    # Inicializar extensiones
     db.init_app(app)
-    Migrate(app, db)  
+    migrate.init_app(app, db)
 
+    # Registrar comandos y blueprints
+    init_app(app)
     app.register_blueprint(email_bp, url_prefix='/api/email')
     app.register_blueprint(facturas_bp, url_prefix='/api/factura')
     app.register_blueprint(usuarios_bp, url_prefix='/api/usuario')

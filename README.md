@@ -45,3 +45,12 @@ if you want to create a migration, you must run the following commands
 ```bash
   flask db upgrade
 ```
+
+## Migrations Seed
+if you want to create a seed, you must run the following commands
+
+### Create a seed
+```bash
+  flask seed all
+```
+
