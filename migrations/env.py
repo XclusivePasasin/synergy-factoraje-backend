@@ -2,55 +2,70 @@ import logging
 from logging.config import fileConfig
 
 from flask import current_app
+
 from alembic import context
 
-# Configuración de Alembic
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
 config = context.config
 
-# Configuración de logging para Alembic
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
 fileConfig(config.config_file_name)
 logger = logging.getLogger('alembic.env')
 
 
 def get_engine():
-    """Obtén la instancia del motor de base de datos desde Flask-SQLAlchemy."""
     try:
-        # Compatible con Flask-SQLAlchemy <3 y Alchemical
+        # this works with Flask-SQLAlchemy<3 and Alchemical
         return current_app.extensions['migrate'].db.get_engine()
     except (TypeError, AttributeError):
-        # Compatible con Flask-SQLAlchemy >=3
+        # this works with Flask-SQLAlchemy>=3
         return current_app.extensions['migrate'].db.engine
 
 
 def get_engine_url():
-    """Obtén la URL del motor de base de datos."""
     try:
-        return get_engine().url.render_as_string(hide_password=False).replace('%', '%%')
+        return get_engine().url.render_as_string(hide_password=False).replace(
+            '%', '%%')
     except AttributeError:
         return str(get_engine().url).replace('%', '%%')
 
 
-# Configura la URL de SQLAlchemy para Alembic
+# add your model's MetaData object here
+# for 'autogenerate' support
+# from myapp import mymodel
+# target_metadata = mymodel.Base.metadata
 config.set_main_option('sqlalchemy.url', get_engine_url())
-
-# Define los metadatos a usar para la generación automática
 target_db = current_app.extensions['migrate'].db
+
+# other values from the config, defined by the needs of env.py,
+# can be acquired:
+# my_important_option = config.get_main_option("my_important_option")
+# ... etc.
 
 
 def get_metadata():
-    """Obtén los metadatos para la generación automática de migraciones."""
     if hasattr(target_db, 'metadatas'):
         return target_db.metadatas[None]
     return target_db.metadata
 
 
 def run_migrations_offline():
-    """Ejecuta las migraciones en modo offline."""
+    """Run migrations in 'offline' mode.
+
+    This configures the context with just a URL
+    and not an Engine, though an Engine is acceptable
+    here as well.  By skipping the Engine creation
+    we don't even need a DBAPI to be available.
+
+    Calls to context.execute() here emit the given string to the
+    script output.
+
+    """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
-        target_metadata=get_metadata(),
-        literal_binds=True
+        url=url, target_metadata=get_metadata(), literal_binds=True
     )
 
     with context.begin_transaction():
@@ -58,9 +73,16 @@ def run_migrations_offline():
 
 
 def run_migrations_online():
-    """Ejecuta las migraciones en modo online."""
+    """Run migrations in 'online' mode.
 
-    # Callback para evitar migraciones vacías
+    In this scenario we need to create an Engine
+    and associate a connection with the context.
+
+    """
+
+    # this callback is used to prevent an auto-migration from being generated
+    # when there are no changes to the schema
+    # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
     def process_revision_directives(context, revision, directives):
         if getattr(config.cmd_opts, 'autogenerate', False):
             script = directives[0]
@@ -68,12 +90,10 @@ def run_migrations_online():
                 directives[:] = []
                 logger.info('No changes in schema detected.')
 
-    # Configuración de argumentos adicionales
     conf_args = current_app.extensions['migrate'].configure_args
     if conf_args.get("process_revision_directives") is None:
         conf_args["process_revision_directives"] = process_revision_directives
 
-    # Obtén el motor de conexión
     connectable = get_engine()
 
     with connectable.connect() as connection:
@@ -87,7 +107,6 @@ def run_migrations_online():
             context.run_migrations()
 
 
-# Selección entre modos offline y online
 if context.is_offline_mode():
     run_migrations_offline()
 else:

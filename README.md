@@ -1,4 +1,4 @@
-# sinergy-factoraje-backend
+# synergy-factoraje-backend
 Factoring is a financial service that allows suppliers to receive advance payments on their outstanding invoices in exchange for an agreed discount. This system facilitates cash flow for suppliers by advancing the payment of their accounts receivable without waiting for established deadlines.
 
 ## Installation of dependencies
@@ -49,8 +49,12 @@ if you want to create a migration, you must run the following commands
 ## Migrations Seed
 if you want to create a seed, you must run the following commands
 
-### Create a seed
+### Create a seeds
 ```bash
-  flask seed all
+  flask seed parametros
+  flask seed estados
+  flask seed roles
+  flask seed proveedores
+  flask seed facturas
 ```
 
