@@ -167,3 +167,215 @@
     "message": "El usuario no existe"
 }
 ```
+### **Cerrar Sesión**
+**Endpoint:** `POST /api/usuario/cerrar-sesion?usuario_id=1`  
+**Descripción:** Cierra la session del usuario.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Response:**
+```json
+
+{
+    "data":null,
+    "message": "Se ha cerrado la session exitosamente",
+    "code": 0
+}
+
+```
+
+
+## Endpoints Solicitudes
+
+### **Listar todas las solicitudes**
+**Endpoint:** `GET /api/solicitud/obtener-solicitudes`
+**Descripción:** Devuelve una lista de solicitudes con soporte para filtros y paginación.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Query Parameters (opcional):**
+- `page`: Número de página (ejemplo: `1`).
+- `per_page`: Cantidad de elementos por página (ejemplo: `10`).
+- `fecha_inicio`, `fecha_fin`: Rango de fechas.
+- `estado`: Filtrar por estado.
+- `proveedor`: Buscar por nombre de proveedor, correo, NCR o teléfono.
+- 'nombre_proveedor': nombre proveedor
+- 'nrc': 
+- telefono:
+- correo:
+
+**Request Body:**
+```json
+{
+    "nombre_completo": "Julian Zan",
+    "email": "julian.zan4@example.com",
+    "cargo": "Gerente",
+    "id_rol": 1
+}
+
+```
+
+**Response (success):**
+```json
+{
+    "code": 0,
+    "data": {
+        "cargo": "Gerente",
+        "email": "julian.zan5@example.com",
+        "id_rol": 1,
+        "nombre_completo": "Julian Zan",
+        "usuario_id": 5
+    },
+    "message": "Usuario creado exitosamente"
+}
+```
+### **Mostrar detalle de una solicitud**
+**Endpoint:** `GET /api/solicitud/obtener-detalle-solicitud?id=2`
+**Descripción:** Devuelve los detalles de una solicitud específica.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Response:**
+```json
+{
+    "code": 0,
+    "data": {
+        "id": 1,
+        "nombre_cliente": "Empresa XYZ",
+        "contacto": "Juan Pérez",
+        "email": "juan.perez@example.com",
+        "iva": 200.0,
+        "subtotal": 1000.0,
+        "total": 1200.0,
+        "estado": "Pendiente",
+        "id_estado": 1,
+        "factura": {
+            "id": 5,
+            "no_factura": "1234",
+            "monto": 1200.0,
+            "fecha_emision": "2024-11-20T00:00:00",
+            "fecha_vence": "2025-01-20T00:00:00",
+            "proveedor": {
+                "id": 3,
+                "razon_social": "Proveedor ABC",
+                "correo_electronico": "proveedor@abc.com",
+                "telefono": "555-1234"
+            }
+        }
+    },
+    "message": "Consulta exitosa"
+}
+```
+
+### **Aprobar una solicitud**
+**Endpoint:** `PUT /api/solicitud/aprobar?id=2`
+**Descripción:** Cambia el estado de la solicitud a Aprobada y puede registrar información adicional sobre quién aprobó la solicitud.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Body (JSON):**
+```json
+{
+  "id_aprobador": 5, // ID del usuario que aprueba la solicitud
+  "comentario": "Documentacion satisfactoria" // (opcional) si esta definido agregarlo a la tabla de comentarios
+}
+```
+
+**Response:**
+```json
+
+{
+    "data":{
+        "solicitud":{
+            "id": 1,
+            "nombre_cliente": "John Doe",
+            "contacto": "12345678",
+            "email": "john.doe@example.com",
+            "estado": "Aprobada",
+            "id_estado": 1,
+            "fecha_aprobacion": "2024-11-18",
+            "total": 1000.50,
+            "factura": {
+                    "id": 1,
+                    "no_factura": "FAC123",
+                    "monto": 500.00,
+                    "proveedor": {
+                        "id": 10,
+                        "razon_social": "Proveedor S.A."
+                    }
+            }
+        }
+    },
+    "message": "Solicitud aprobada exitosamente."
+}
+
+```
+
+### **Denegar una solicitud**
+**Endpoint:** `PUT /api/solicitud/denegar?id=2`
+**Descripción:** Cambia el estado de la solicitud a Denegada y permite registrar una razón para la denegación.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Body (JSON):**
+```json
+{
+  "id_aprobador": 5, // ID del usuario que deniega la solicitud
+  "comentario": "Documentación incompleta." // (opcional) si esta definido agregarlo a la tabla de comentarios
+}
+
+```
+
+**Response:**
+```json
+
+{
+    "data":{
+        "solicitud":{
+            "id": 5,
+            "nombre_cliente": "John Doe",
+            "contacto": "12345678",
+            "email": "john.doe@example.com",
+            "estado": "Denegada",
+            "id_estado": 1,
+            "fecha_aprobacion": "2024-11-18",
+            "total": 1000.50,
+            "factura": {
+                    "id": 1,
+                    "no_factura": "FAC123",
+                    "monto": 500.00,
+                    "proveedor": {
+                        "id": 10,
+                        "razon_social": "Proveedor S.A."
+                    }
+            }
+        }
+    },
+    "message": "Solicitud denegada."
+}
+```

@@ -69,7 +69,7 @@ def obtener_solicitudes():
                     "iva": float(solicitud.iva),
                     "subtotal": float(solicitud.subtotal),
                     "total": float(solicitud.total),
-                    "estado": solicitud.estado.clave if solicitud.estado else None,
+                    "estado": solicitud.estado.clave ,
                     "id_estado": solicitud.id_estado,
                     "factura": {
                         "id": solicitud.factura.id,
