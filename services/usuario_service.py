@@ -7,7 +7,7 @@ from models.usuarios import Usuario
 from models.roles import Rol
 from utils.db import db
 from utils.response import response_success, response_error
-
+from utils.destructor import blacklist_token
 
 class UsuarioService:
     @staticmethod
@@ -229,4 +229,32 @@ class UsuarioService:
         except jwt.InvalidTokenError:
             # El token es inválido
             return 'invalido'
+        
+    @staticmethod
+    def destruir_token(usuario_id, token):
+        """
+        Elimina el token y su fecha de expiración del usuario, y agrega el token a la lista negra.
+        """
+        try:
+            # Buscar el usuario por ID
+            usuario = db.session.query(Usuario).filter_by(id=usuario_id).first()
+            if not usuario:
+                return response_error("Usuario no encontrado", http_status=404)
+
+            # Validar que el token pertenece al usuario
+            if usuario.token != token:
+                return response_error("El token proporcionado no corresponde al usuario", http_status=403)
+
+            # Agregar el token a la lista negra
+            blacklist_token(token)
+
+            # Eliminar el token y la fecha de expiración de la base de datos
+            usuario.token = None
+            usuario.token_date_end = None
+            db.session.commit()
+
+            return response_success(None, "Token destruido exitosamente")
+        except Exception as e:
+            db.session.rollback()
+            return response_error(f"Error al destruir el token: {str(e)}", http_status=500)
 

@@ -2,6 +2,7 @@ from flask import request, jsonify
 from functools import wraps
 from services.usuario_service import UsuarioService  
 from utils.response import response_error
+from utils.destructor import is_token_blacklisted
 
 def token_required(f):
     @wraps(f)
@@ -22,6 +23,10 @@ def token_required(f):
                 return response_error("El formato del token es incorrecto", http_status=401)
         except Exception as e:
             return response_error(f"Error al procesar la cabecera de autorización: {str(e)}", http_status=401)
+
+        # Verificar si el token está en la lista negra
+        if is_token_blacklisted(token):
+            return response_error("Token inválido o revocado", http_status=401)
 
         # Validar el token utilizando el servicio
         resultado_validacion = UsuarioService.validar_token(token)
