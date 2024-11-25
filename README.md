@@ -38,6 +38,7 @@ if you want to create a migration, you must run the following commands
 
 ### Create a migration
 ```bash
+  flask db init
   flask db migrate
 ```
 
