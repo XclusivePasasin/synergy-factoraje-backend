@@ -4,6 +4,8 @@ import re
 from flask import current_app
 import jwt
 from models.usuarios import Usuario
+from models.permisos import Permiso
+from models.menus import Menu
 from models.roles import Rol
 from utils.db import db
 from utils.response import response_success, response_error
@@ -39,7 +41,8 @@ class UsuarioService:
                 return response_error("El correo ya está registrado", http_status=409)
 
             # Generar contraseña temporal
-            temp_password = UsuarioService.generar_contraseña_temp()
+            # temp_password = UsuarioService.generar_contraseña_temp()
+            temp_password = '12345678'
             print('temp_password: ', temp_password)
 
             # Hashear la contraseña y la contraseña temporal usando hashlib con SHA-256
@@ -77,7 +80,7 @@ class UsuarioService:
     @staticmethod
     def inicio_sesion(data):
         """
-        Autentica un usuario utilizando el email y genera un token JWT si las credenciales son válidas.
+        Autentica un usuario utilizando el email y la contraseña, y genera un JWT definitivo.
         """
         try:
             # Validar los campos requeridos
@@ -90,10 +93,6 @@ class UsuarioService:
             # Validar formato del email
             if len(email) < 10 or len(email) > 100 or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
                 return response_error("El formato o longitud del correo electrónico no es válido", http_status=400)
-
-            # Validar longitud de la contraseña
-            if len(password) < 6 or len(password) > 20:
-                return response_error("La longitud de la contraseña debe estar entre 6 y 20 caracteres", http_status=400)
 
             # Buscar al usuario en la base de datos por email
             usuario_encontrado = Usuario.query.filter_by(email=email).first()
@@ -108,23 +107,58 @@ class UsuarioService:
             if hashed_password != usuario_encontrado.password:
                 return response_error("La contraseña es incorrecta", http_status=401)
 
-            # Generar el token
-            token_data = UsuarioService.crear_token(email)  # Usar email
+            # Consultar el rol del usuario y los permisos asociados
+            rol = Rol.query.get(usuario_encontrado.id_rol)
+            permisos = Permiso.query.filter_by(id_rol=usuario_encontrado.id_rol).all()
 
-            if not token_data:
+            # Construir la estructura de permisos y menús
+            permisos_data = []
+            for permiso in permisos:
+                menu = Menu.query.get(permiso.id_menu)
+                permisos_data.append({
+                    "create_perm": 1 if permiso.create_perm else 0, 
+                    "edit_perm": 1 if permiso.edit_perm else 0,     
+                    "delete_perm": 1 if permiso.delete_perm else 0,  
+                    "view_perm": 1 if permiso.view_perm else 0,     
+                    "menu": {
+                        "id": menu.id,
+                        "menu": menu.menu,
+                        "path": menu.path,
+                        "icon": menu.icon,
+                        "orden": menu.orden,
+                        "padre": menu.padre
+                    }
+                })
+
+            # Crear el token JWT
+            expires_in = 86400  # 24 horas
+            access_token = UsuarioService.crear_token(email)
+            token = access_token["token"]
+
+            if not access_token:
                 return response_error("Error al generar el token", http_status=500)
 
-            # Responder con los datos del usuario y el token
-            respuesta = {
-                "usuario_id": token_data["usuario_id"],
-                "nombre_completo": token_data["nombre_completo"],
-                "email": token_data["email"],
-                "token": token_data["token"]
+            # Construir la respuesta con los datos del usuario y el token
+            usuario_data = {
+                "id": usuario_encontrado.id,
+                "name": usuario_encontrado.nombre_completo,
+                "email": usuario_encontrado.email,
+                "role": rol.rol if rol else "Sin rol asignado",
+                "permissions": permisos_data
             }
-            return response_success(respuesta, "Inicio de sesión exitoso", http_status=200)
+
+            # Responder con la estructura correcta
+            respuesta = {
+                "usuario": usuario_data,
+                "access_token": token,  
+                "expires_in": expires_in
+            }
+
+            return response_success(respuesta, "Autenticación completada", http_status=200)
         except Exception as e:
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
-    
+
+
     @staticmethod
     def generar_contraseña_temp(length=10):
         import string
@@ -191,22 +225,58 @@ class UsuarioService:
             if not usuario_encontrado:
                 return response_error("El usuario no existe", http_status=404)
 
-            # Generar un nuevo token
-            token_data = UsuarioService.crear_token(email)
+            # Generar un nuevo token JWT
+            expires_in = 86400  # 24 horas
+            access_token = UsuarioService.crear_token(email)
+            token = access_token["token"]
 
-            if not token_data:
+            if not access_token:
                 return response_error("Error al generar el token", http_status=500)
 
-            # Retornar los datos del usuario y el nuevo token
-            respuesta = {
-                "usuario_id": token_data["usuario_id"],
-                "nombre_completo": token_data["nombre_completo"],
-                "email": token_data["email"],
-                "token": token_data["token"]
+            # Consultar el rol del usuario y los permisos asociados
+            rol = Rol.query.get(usuario_encontrado.id_rol)
+            permisos = Permiso.query.filter_by(id_rol=usuario_encontrado.id_rol).all()
+
+            # Construir la estructura de permisos y menús
+            permisos_data = []
+            for permiso in permisos:
+                menu = Menu.query.get(permiso.id_menu)
+                permisos_data.append({
+                    "create_perm": 1 if permiso.create_perm else 0, 
+                    "edit_perm": 1 if permiso.edit_perm else 0,     
+                    "delete_perm": 1 if permiso.delete_perm else 0,  
+                    "view_perm": 1 if permiso.view_perm else 0,      
+                    "menu": {
+                        "id": menu.id,
+                        "menu": menu.menu,
+                        "path": menu.path,
+                        "icon": menu.icon,
+                        "orden": menu.orden,
+                        "padre": menu.padre
+                    }
+                })
+
+            # Construir los datos del usuario
+            usuario_data = {
+                "id": usuario_encontrado.id,
+                "name": usuario_encontrado.nombre_completo,
+                "email": usuario_encontrado.email,
+                "role": rol.rol if rol else "Sin rol asignado",
+                "permissions": permisos_data
             }
+
+            # Construir la respuesta con los mismos campos que inicio_sesion
+            respuesta = {
+                "usuario": usuario_data,
+                "access_token": token,  
+                "expires_in": expires_in
+            }
+
             return response_success(respuesta, "Token generado exitosamente", http_status=200)
         except Exception as e:
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
+
 
         
     @staticmethod
