@@ -115,12 +115,32 @@
 {
     "code": 0,
     "data": {
-        "email": "julian.zan3@example.com",
-        "nombre_completo": "Julian Zan",
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Imp1bGlhbi56YW4zQGV4YW1wb...",
-        "usuario_id": 3
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAYWRtaW4uY29tIiwiZXhwIjoxNzMyODIwMzY2fQ.11UCiRhAEGG_9gxEsjyVA5LLQ-5fqL2_pmEJeh5GoII",
+        "expires_in": 86400,
+        "usuario": {
+            "email": "test@admin.com",
+            "id": 2,
+            "name": "Test",
+            "permissions": [
+                {
+                    "create_perm": 1,
+                    "delete_perm": 0,
+                    "edit_perm": 1,
+                    "menu": {
+                        "icon": "fa-solid-file",
+                        "id": 1,
+                        "menu": "Solicitudes",
+                        "orden": 2,
+                        "padre": 0,
+                        "path": "/solicitudes"
+                    },
+                    "view_perm": 0
+                }
+            ],
+            "role": "Administrador"
+        }
     },
-    "message": "Inicio de sesión exitoso"
+    "message": "Autenticación completada"
 }
 ```
 **Response (error):**
@@ -151,12 +171,32 @@
 {
     "code": 0,
     "data": {
-        "email": "julian.zan3@example.com",
-        "nombre_completo": "Julian Zan",
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9....",
-        "usuario_id": 3
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAYWRtaW4uY29tIiwiZXhwIjoxNzMyODIwMzY2fQ.11UCiRhAEGG_9gxEsjyVA5LLQ-5fqL2_pmEJeh5GoII",
+        "expires_in": 86400,
+        "usuario": {
+            "email": "test@admin.com",
+            "id": 2,
+            "name": "Test",
+            "permissions": [
+                {
+                    "create_perm": 1,
+                    "delete_perm": 0,
+                    "edit_perm": 1,
+                    "menu": {
+                        "icon": "fa-solid-file",
+                        "id": 1,
+                        "menu": "Solicitudes",
+                        "orden": 2,
+                        "padre": 0,
+                        "path": "/solicitudes"
+                    },
+                    "view_perm": 0
+                }
+            ],
+            "role": "Administrador"
+        }
     },
-    "message": "Token generado exitosamente"
+    "message": "Autenticación completada"
 }
 ```
 **Response (error):**
