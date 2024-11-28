@@ -244,43 +244,62 @@
 ```
 
 **Query Parameters (opcional):**
-- `page`: Número de página (ejemplo: `1`).
-- `per_page`: Cantidad de elementos por página (ejemplo: `10`).
-- `fecha_inicio`, `fecha_fin`: Rango de fechas.
-- `estado`: Filtrar por estado.
-- `proveedor`: Buscar por nombre de proveedor, correo, NCR o teléfono.
+- 'page': Número de página (ejemplo: `1`).
+- 'per_page': Cantidad de elementos por página (ejemplo: `10`).
+- 'fecha_inicio', `fecha_fin`: Rango de fechas.
+- 'estado': Filtrar por estado.
+- 'no_factura': Filtrar por número de factura.
 - 'nombre_proveedor': nombre proveedor
 - 'nrc': 
-- telefono:
-- correo:
-
-**Request Body:**
-```json
-{
-    "nombre_completo": "Julian Zan",
-    "email": "julian.zan4@example.com",
-    "cargo": "Gerente",
-    "id_rol": 1
-}
-
-```
+- 'telefono':
+- 'correo':
 
 **Response (success):**
 ```json
 {
     "code": 0,
     "data": {
-        "cargo": "Gerente",
-        "email": "julian.zan5@example.com",
-        "id_rol": 1,
-        "nombre_completo": "Julian Zan",
-        "usuario_id": 5
+        "current_page": 1,
+        "per_page": 10,
+        "solicitudes": [
+            {
+                "contacto": "555-67891",
+                "email": "misael.gutierrez@clobi.cl",
+                "estado": "PENDIENTE",
+                "factura": {
+                    "fecha_emision": "2024-11-05T09:00:00",
+                    "fecha_otorga": "2024-11-05T09:30:00",
+                    "fecha_vence": "2025-01-19T09:00:00",
+                    "id": 2,
+                    "monto": 3000.0,
+                    "no_factura": "FAC002",
+                    "proveedor": {
+                        "correo_electronico": "info@futuretech.com",
+                        "id": 2,
+                        "max_factoring": "8000.00",
+                        "min_factoring": "2000.00",
+                        "nit": "NIT987654321",
+                        "nombre_contacto": "Sofía Ramírez",
+                        "nrc": "NRC67891",
+                        "razon_social": "FutureTech Innovators",
+                        "telefono": "555-67891"
+                    }
+                },
+                "id": 4,
+                "id_estado": 1,
+                "iva": 10.72,
+                "nombre_cliente": "Misael Gutierrez",
+                "subtotal": 93.22,
+                "total": 2906.78
+            }
+        ],
+        "total_pages": 1
     },
-    "message": "Usuario creado exitosamente"
+    "message": "Consulta exitosa"
 }
 ```
 ### **Mostrar detalle de una solicitud**
-**Endpoint:** `GET /api/solicitud/obtener-detalle-solicitud?id=2`
+**Endpoint:** `GET /api/solicitud/obtener-detalle-solicitud?id=`
 **Descripción:** Devuelve los detalles de una solicitud específica.
 
 **Headers:**
@@ -295,28 +314,28 @@
 {
     "code": 0,
     "data": {
-        "id": 1,
-        "nombre_cliente": "Empresa XYZ",
-        "contacto": "Juan Pérez",
-        "email": "juan.perez@example.com",
-        "iva": 200.0,
-        "subtotal": 1000.0,
-        "total": 1200.0,
-        "estado": "Pendiente",
-        "id_estado": 1,
+        "contacto": "555-67891",
+        "email": "misael.gutierrez@clobi.cl",
+        "estado": "PENDIENTE",
         "factura": {
-            "id": 5,
-            "no_factura": "1234",
-            "monto": 1200.0,
-            "fecha_emision": "2024-11-20T00:00:00",
-            "fecha_vence": "2025-01-20T00:00:00",
+            "fecha_emision": "2024-11-05T09:00:00",
+            "fecha_vence": "2025-01-19T09:00:00",
+            "id": 2,
+            "monto": 3000.0,
+            "no_factura": "FAC002",
             "proveedor": {
-                "id": 3,
-                "razon_social": "Proveedor ABC",
-                "correo_electronico": "proveedor@abc.com",
-                "telefono": "555-1234"
+                "correo_electronico": "info@futuretech.com",
+                "id": 2,
+                "razon_social": "FutureTech Innovators",
+                "telefono": "555-67891"
             }
-        }
+        },
+        "id": 4,
+        "id_estado": 1,
+        "iva": 10.72,
+        "nombre_cliente": "Misael Gutierrez",
+        "subtotal": 93.22,
+        "total": 2906.78
     },
     "message": "Consulta exitosa"
 }
