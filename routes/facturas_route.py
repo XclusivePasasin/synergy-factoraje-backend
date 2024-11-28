@@ -114,8 +114,8 @@ def solicitar_pago_factura():
 
         # Crear la nueva solicitud
         nueva_solicitud = Solicitud(
-            nombre_cliente=facturas_data['cliente'],
-            contacto=data['nombre_solicitante'],  
+            nombre_cliente=data['nombre_solicitante'],  
+            contacto=factura_existente.proveedor.telefono,  
             email=data['correo_electronico'],
             cargo=data['cargo'],
             descuento_app=facturas_data['pronto_pago'],
@@ -124,32 +124,13 @@ def solicitar_pago_factura():
             total=facturas_data['total_a_recibir'],
             fecha_solicitud=fecha_actual,
             id_factura=factura_existente.id,
-            id_estado=1 # Estado de la solicitud: Pendiente
+            id_estado=1  
         )
 
         db.session.add(nueva_solicitud)
         db.session.commit()
 
-        # Preparar la respuesta
-        resultado = {
-            "factura": {
-                "cliente": facturas_data["cliente"],
-                "no_factura": facturas_data["no_factura"],
-                "dias_restantes": dias,
-                "fecha_otorgamiento": facturas_data["fecha_otorgamiento"],
-                "fecha_vencimiento": facturas_data["fecha_vencimiento"],
-                "monto_factura": facturas_data["monto_factura"],
-                "iva": facturas_data["iva"],
-                "pronto_pago": facturas_data["pronto_pago"],
-                "subtotal_descuento": facturas_data["subtotal_descuento"],
-                "total_a_recibir": facturas_data["total_a_recibir"]
-            },
-            "nombre_solicitante": data["nombre_solicitante"],
-            "correo_electronico": data["correo_electronico"],
-            "cargo": data["cargo"]
-        }
-
-        return response_success(None, "Solicitud creada exitosamente", http_status=201)
+        return response_success("Solicitud creada exitosamente", http_status=201)
     except Exception as e:
         return response_error(str(e), http_status=500)
 
