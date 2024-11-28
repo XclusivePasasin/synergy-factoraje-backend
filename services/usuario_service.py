@@ -47,13 +47,11 @@ class UsuarioService:
 
             # Hashear la contraseña y la contraseña temporal usando hashlib con SHA-256
             salt = current_app.config['SALT_SECRET'] 
-            hashed_password = hashlib.sha256((temp_password + salt).encode('utf-8')).hexdigest()
             hashed_temp_password = hashlib.sha256((temp_password + salt).encode('utf-8')).hexdigest()
             # Crear el nuevo usuario
             nuevo_usuario = Usuario(
                 nombre_completo=nombre_completo,
                 email=email,
-                password=hashed_password,
                 temp_password=hashed_temp_password,
                 cargo=cargo,
                 id_rol=id_rol
@@ -73,7 +71,6 @@ class UsuarioService:
             }
             return response_success(respuesta, "Usuario creado exitosamente", http_status=201)
         except Exception as e:
-            # Revertir cambios en caso de error
             db.session.rollback()
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
         
@@ -103,9 +100,18 @@ class UsuarioService:
             salt = current_app.config.get('SALT_SECRET')
             hashed_password = hashlib.sha256((password + salt).encode('utf-8')).hexdigest()
 
-            # Validar la contraseña
-            if hashed_password != usuario_encontrado.password:
-                return response_error("La contraseña es incorrecta", http_status=401)
+            # Verificar si el usuario tiene una contraseña o solo la contraseña temporal
+            if usuario_encontrado.password:
+                # Si el usuario tiene una contraseña (es decir, ya la ha cambiado anteriormente)
+                if hashed_password != usuario_encontrado.password:
+                    return response_error("La contraseña es incorrecta", http_status=401)
+                change_password = 0
+            else:
+                # Si el campo 'password' está vacío, se verifica contra la 'temp_password'
+                hashed_temp_password = hashlib.sha256((password + salt).encode('utf-8')).hexdigest()
+                if hashed_temp_password != usuario_encontrado.temp_password:
+                    return response_error("La contraseña es incorrecta", http_status=401)
+                change_password = 1 
 
             # Consultar el rol del usuario y los permisos asociados
             rol = Rol.query.get(usuario_encontrado.id_rol)
@@ -144,14 +150,15 @@ class UsuarioService:
                 "name": usuario_encontrado.nombre_completo,
                 "email": usuario_encontrado.email,
                 "role": rol.rol if rol else "Sin rol asignado",
-                "permissions": permisos_data
+                "permissions": permisos_data, 
             }
 
             # Responder con la estructura correcta
             respuesta = {
                 "usuario": usuario_data,
                 "access_token": token,  
-                "expires_in": expires_in
+                "expires_in": expires_in,
+                "change_password": change_password 
             }
 
             return response_success(respuesta, "Autenticación completada", http_status=200)
@@ -327,4 +334,40 @@ class UsuarioService:
         except Exception as e:
             db.session.rollback()
             return response_error(f"Error al destruir el token: {str(e)}", http_status=500)
+        
+    @staticmethod
+    def actualizar_contraseña(email, nueva_contraseña):
+        """
+        Actualiza la contraseña principal para el usuario especificado, solo si la contraseña temporal no es None.
+        Si la contraseña temporal es None, retorna un error indicando que no se puede actualizar la contraseña.
+        """
+        try:
+            # Buscar al usuario en la base de datos por email
+            usuario = Usuario.query.filter_by(email=email).first()
+            if not usuario:
+                return response_error("El usuario no existe", http_status=404)
+
+            # Verificar si la contraseña temporal está presente
+            if usuario.temp_password is None:
+                return response_error("Actualización de contraseña no permitida sin una contraseña temporal válida", http_status=403)
+
+            # Hashear la nueva contraseña
+            salt = current_app.config['SALT_SECRET']
+            hashed_password = hashlib.sha256((nueva_contraseña + salt).encode('utf-8')).hexdigest()
+
+            # Actualizar la contraseña del usuario en la base de datos y limpiar la contraseña temporal
+            usuario.password = hashed_password
+            usuario.temp_password = None  # Establecer la contraseña temporal a None
+            db.session.commit()
+
+            # Retornar el email con un mensaje de éxito
+            respuesta = {
+                "email": email,
+                "mensaje": "Contraseña actualizada exitosamente"
+            }
+
+            return response_success(respuesta, "Contraseña actualizada correctamente", http_status=200)
+        except Exception as e:
+            db.session.rollback()
+            return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
 

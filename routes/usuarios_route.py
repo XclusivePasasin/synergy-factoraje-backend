@@ -63,3 +63,21 @@ def cerrar_sesion():
         return UsuarioService.destruir_token(usuario_id, token)
     except Exception as e:
         return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+    
+@usuarios_bp.route('/cambiar-contraseña', methods=['POST'])
+@token_required
+def primera_actualizacion_contrasena_inicio_sesion():
+    """
+    Endpoint para la primera actualización de contraseña al inicio de sesión.
+    """
+    try:
+        data = request.get_json()
+        if not data or 'email' not in data or 'nueva_contrasena' not in data:
+            return response_error("Los campos 'email' y 'nueva_contrasena' son obligatorios", http_status=400)
+        email = data['email']
+        nueva_contrasena = data['nueva_contrasena']
+        
+        # Llamada al servicio para actualizar la contraseña
+        return UsuarioService.actualizar_contraseña(email, nueva_contrasena)
+    except Exception as e:
+        return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
