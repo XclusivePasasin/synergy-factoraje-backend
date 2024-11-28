@@ -20,11 +20,11 @@ def obtener_solicitudes():
         fecha_inicio = request.args.get('fecha_inicio')
         fecha_fin = request.args.get('fecha_fin')
         estado = request.args.get('estado')
-        proveedor = request.args.get('proveedor')
         nombre_proveedor = request.args.get('nombre_proveedor')
         nrc = request.args.get('nrc')
         telefono = request.args.get('telefono')
         correo = request.args.get('correo')
+        no_factura = request.args.get('no_factura')
 
         # Construir el query base
         query = db.session.query(Solicitud).join(Factura, Solicitud.id_factura == Factura.id).join(
@@ -34,14 +34,7 @@ def obtener_solicitudes():
         if fecha_inicio and fecha_fin:
             query = query.filter(Solicitud.fecha_solicitud.between(fecha_inicio, fecha_fin))
         if estado:
-            query = query.filter(Solicitud.estado.has(nombre=estado))
-        if proveedor:
-            query = query.filter(or_(
-                ProveedorCalificado.razon_social.ilike(f"%{proveedor}%"),
-                ProveedorCalificado.correo_electronico.ilike(f"%{proveedor}%"),
-                ProveedorCalificado.nrc.ilike(f"%{proveedor}%"),
-                ProveedorCalificado.telefono.ilike(f"%{proveedor}%")
-            ))
+            query = query.filter(Solicitud.id_estado == estado)
         if nombre_proveedor:
             query = query.filter(ProveedorCalificado.razon_social.ilike(f"%{nombre_proveedor}%"))
         if nrc:
@@ -50,6 +43,8 @@ def obtener_solicitudes():
             query = query.filter(ProveedorCalificado.telefono.ilike(f"%{telefono}%"))
         if correo:
             query = query.filter(ProveedorCalificado.correo_electronico.ilike(f"%{correo}%"))
+        if no_factura:  
+            query = query.filter(Factura.no_factura.ilike(f"%{no_factura}%"))
 
         # Paginación
         total_solicitudes = query.count()
@@ -77,11 +72,11 @@ def obtener_solicitudes():
                         "monto": float(solicitud.factura.monto),
                         "fecha_emision": solicitud.factura.fecha_emision.isoformat(),
                         "fecha_vence": solicitud.factura.fecha_vence.isoformat(),
+                        "fecha_otorga": solicitud.factura.fecha_otorga.isoformat(),
                         "proveedor": {
-                            "id": solicitud.factura.proveedor.id,
-                            "razon_social": solicitud.factura.proveedor.razon_social,
-                            "correo_electronico": solicitud.factura.proveedor.correo_electronico,
-                            "telefono": solicitud.factura.proveedor.telefono,
+                            key: getattr(solicitud.factura.proveedor, key)
+                            for key in ProveedorCalificado.__table__.columns.keys()
+                            if key not in ["cuenta_bancaria", "created_at", "updated_at"]
                         }
                     } if solicitud.factura else None
                 } for solicitud in solicitudes
