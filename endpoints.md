@@ -57,6 +57,66 @@
 }
 ```
 
+### **Solicitar Solicitud de Pronto Pago**
+**Endpoint:** `POST /api/solicitud/solicitar-pago-factura`
+**Descripción:** Solicita una factura de pronto pago.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**request Body:**
+```json
+{
+    "data": {
+        "factura": {
+            "cliente": "CodeFusion Labs",
+            "dias_restantes": 55,
+            "fecha_otorgamiento": "05/11/2024",
+            "fecha_vencimiento": "19/01/2025",
+            "iva": 10.72,
+            "monto_factura": 3000.0,
+            "no_factura": "FAC002",
+            "pronto_pago": 82.5,
+            "subtotal_descuento": 93.22,
+            "total_a_recibir": 2906.78
+        },
+        "nombre_solicitante": "Misael Gutierrez",
+        "cargo": "Ingeniero Software",
+        "correo_electronico": "misael.gutierrez@clobi.cl"
+    }
+}
+```
+
+**Response (success):**
+```json
+{
+    "code": 0,
+    "data": {
+        "cargo": "Ingeniero Software",
+        "correo_electronico": "misael.gutierrez@clobi.cl",
+        "factura": {
+            "cliente": "CodeFusion Labs",
+            "dias_restantes": 51,
+            "fecha_otorgamiento": "05/11/2024",
+            "fecha_vencimiento": "19/01/2025",
+            "iva": 10.72,
+            "monto_factura": 3000.0,
+            "no_factura": "FAC002",
+            "pronto_pago": 82.5,
+            "subtotal_descuento": 93.22,
+            "total_a_recibir": 2906.78
+        },
+        "nombre_solicitante": "Misael Gutierrez",
+        "telefono_proveedor": "555-67891"
+    },
+    "message": "Solicitud creada exitosamente"
+}
+```
+
 ## Endpoints Usuario
 
 ### **Crear Usuario**
@@ -79,11 +139,11 @@
 {
     "code": 0,
     "data": {
-        "cargo": "Gerente",
-        "email": "julian.zan5@example.com",
+        "cargo": "Administrador",
+        "email": "tes1t@admin.com",
         "id_rol": 1,
-        "nombre_completo": "Julian Zan",
-        "usuario_id": 5
+        "nombre_completo": "Test1",
+        "usuario_id": 3
     },
     "message": "Usuario creado exitosamente"
 }
@@ -108,6 +168,7 @@
     "email": "juan.perez@example.com",
     "password": "12345678"
 }
+
 ```
 
 **Response (success):**
@@ -115,12 +176,13 @@
 {
     "code": 0,
     "data": {
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAYWRtaW4uY29tIiwiZXhwIjoxNzMyODIwMzY2fQ.11UCiRhAEGG_9gxEsjyVA5LLQ-5fqL2_pmEJeh5GoII",
+        "access_token": "eyJhbGciOiJIUzI1NiIsIZXADDSjfhfyn",
+        "change_password": 0,
         "expires_in": 86400,
         "usuario": {
-            "email": "test@admin.com",
-            "id": 2,
-            "name": "Test",
+            "email": "tes1t@admin.com",
+            "id": 3,
+            "name": "Test1",
             "permissions": [
                 {
                     "create_perm": 1,
@@ -151,6 +213,38 @@
     "message": "El usuario no existe"
 }
 ```
+
+### **Actualizar Contraseña**
+**Endpoint:** `POST /api/usuario/cambiar-contraseña`
+**Descripción:** Actualiza la contraseña del usuario en su primera sesión.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**request Body:**
+```json
+{
+    "email": "juan.perez@example.com",
+    "nueva_contrasena": "12345678"
+}
+```
+
+**Response (success):**
+```json
+{
+    "code": 0,
+    "data": {
+        "email": "juan.perez@example.com",
+        "mensaje": "Contraseña actualizada exitosamente"
+    },
+    "message": "Contraseña actualizada correctamente"
+}
+```
+
 
 ### **Validar Token**
 
@@ -162,8 +256,6 @@
 {
     "email": "email@ejemplo.com",
 }
-
-
 ```
 
 **Response (success):**
@@ -199,6 +291,7 @@
     "message": "Autenticación completada"
 }
 ```
+
 **Response (error):**
 ```json
 {
@@ -207,6 +300,7 @@
     "message": "El usuario no existe"
 }
 ```
+
 ### **Cerrar Sesión**
 **Endpoint:** `POST /api/usuario/cerrar-sesion?usuario_id=1`  
 **Descripción:** Cierra la session del usuario.
@@ -228,7 +322,6 @@
 }
 
 ```
-
 
 ## Endpoints Solicitudes
 
