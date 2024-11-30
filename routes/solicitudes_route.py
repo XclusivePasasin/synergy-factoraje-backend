@@ -7,6 +7,7 @@ from models.proveedores_calificados import ProveedorCalificado
 from sqlalchemy import and_, or_
 from utils.response import response_success, response_error
 from utils.interceptor import token_required
+from services.email_service import *
 
 solicitud_bp = Blueprint('solicitud', __name__)
 
@@ -156,11 +157,11 @@ def aprobar_solicitud():
             return response_error("La solicitud no existe", http_status=404)
 
         # Validar si la solicitud ya está aprobada
-        if solicitud.id_estado == 3:  
+        if solicitud.id_estado == 2:  
             return response_success(None, "La solicitud ya fue aprobada. No se realizó ningún cambio.")
 
         # Actualizar el estado de la solicitud
-        solicitud.id_estado = 3  
+        solicitud.id_estado = 2  
         solicitud.fecha_aprobacion = db.func.now()
         solicitud.id_aprobador = id_aprobador  
 
@@ -176,6 +177,24 @@ def aprobar_solicitud():
 
         # Guardar cambios en la base de datos
         db.session.commit()
+
+        # Enviar correo al usuario notificando la aprobación
+        datos_aprobacion = {
+            "nombreSolicitante": solicitud.nombre_cliente,
+            "noFactura": solicitud.factura.no_factura,
+            "montoFactura": f"${solicitud.total:.2f}",
+            "descuento": f"${solicitud.descuento_app:.2f}",
+            "iva": f"${solicitud.iva:.2f}",
+            "subtotal": f"${solicitud.subtotal:.2f}",
+            "fechaSolicitud": solicitud.fecha_solicitud.strftime("%d/%m/%Y"),
+            "fechaVencimiento": solicitud.factura.fecha_vence.strftime("%d/%m/%Y"),
+            "diasCredito": (solicitud.factura.fecha_vence - solicitud.fecha_aprobacion).days
+        }
+        asunto = f"Solicitud de Pronto Pago Aprobada FACTURA {datos_aprobacion['noFactura']}"
+        contenido_html_aprobacion = generar_plantilla('correo_aprobacion_solicitud_pp.html', datos_aprobacion)
+
+        # Enviar correo al cliente
+        enviar_correo(solicitud.email, asunto, contenido_html_aprobacion)
 
         # Construir respuesta
         solicitud_data = {
@@ -198,9 +217,10 @@ def aprobar_solicitud():
             } if solicitud.factura else None
         }
 
-        return response_success({"solicitud": solicitud_data}, "Solicitud aprobada exitosamente.")
+        return response_success({"solicitud": solicitud_data}, "Solicitud aprobada exitosamente. Correo de notificación enviado.")
     except Exception as e:
         return response_error(f"Error al procesar la solicitud: {str(e)}", http_status=500)
+
 
 
 
@@ -223,12 +243,12 @@ def desaprobar_solicitud():
             return response_error("La solicitud no existe", http_status=404)
 
         # Validar si la solicitud ya está denegada
-        if solicitud.id_estado == 4:  
+        if solicitud.id_estado == 3:  
             return response_success(None, "La solicitud ya fue denegada. No se realizó ningún cambio.")
 
         # Actualizar el estado de la solicitud
-        solicitud.id_estado = 4  
-        solicitud.fecha_aprobacion = None 
+        solicitud.id_estado = 3  
+        solicitud.fecha_aprobacion = None  
 
         # Registrar comentario si se proporciona
         if comentario:
@@ -242,6 +262,19 @@ def desaprobar_solicitud():
 
         # Guardar cambios en la base de datos
         db.session.commit()
+
+        # Enviar correo al usuario notificando la denegación
+        datos_denegacion = {
+            "nombreSolicitante": solicitud.nombre_cliente,
+            "noFactura": solicitud.factura.no_factura,
+            "montoFactura": f"${solicitud.total:.2f}",
+            "fechaSolicitud": solicitud.fecha_solicitud.strftime("%d/%m/%Y"),
+        }
+        asunto = f"Solicitud de Pronto Pago Denegada FACTURA {datos_denegacion['noFactura']}"
+        contenido_html_denegacion = generar_plantilla('correo_denegacion_solicitud_pp.html', datos_denegacion)
+
+        # Enviar correo al cliente
+        enviar_correo(solicitud.email, asunto, contenido_html_denegacion)
 
         # Construir respuesta
         solicitud_data = {
@@ -262,7 +295,7 @@ def desaprobar_solicitud():
             } if solicitud.factura else None
         }
 
-        return response_success({"solicitud": solicitud_data}, "Solicitud denegada exitosamente.")
+        return response_success({"solicitud": solicitud_data}, "Solicitud denegada exitosamente. Correo de notificación enviado.")
     except Exception as e:
         return response_error(f"Error al procesar la solicitud: {str(e)}", http_status=500)
 

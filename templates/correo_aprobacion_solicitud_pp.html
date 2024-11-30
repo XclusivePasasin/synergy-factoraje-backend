@@ -11,7 +11,7 @@
   <div style="max-width: 600px; margin: 20px auto; padding: 20px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px;">
     <!-- Encabezado -->
     <div style="border-top: 4px solid #f97316; padding-top: 10px;">
-      <p style="color: #1f2937;">Estimado/a <span>{{ nombreEmpresa }}</span>,</p>
+      <p style="color: #1f2937;">Estimado/a <span>{{ nombreSolicitante }}</span>,</p>
     </div>
 
     <!-- Contenido principal -->
@@ -38,7 +38,6 @@
           <li><strong>IVA:</strong> ${{ iva }}</li>
           <li><strong>Subtotal del Descuento:</strong> ${{ subtotal }}</li>
           <li><strong>Fecha de Solicitud:</strong> {{ fechaSolicitud }}</li>
-          <li><strong>Fecha de Pago:</strong> {{ fechaPago }}</li>
           <li><strong>Fecha de Vencimiento:</strong> {{ fechaVencimiento }}</li>
           <li><strong>Días de Crédito Restantes:</strong> {{ diasCredito }}</li>
         </ul>
