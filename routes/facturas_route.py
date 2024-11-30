@@ -7,6 +7,7 @@ from models.facturas import Factura
 from utils.db import db
 from utils.response import response_success, response_error
 from utils.interceptor import token_required
+from services.email_service import *
 
 facturas_bp = Blueprint('factura', __name__)
 
@@ -130,9 +131,38 @@ def solicitar_pago_factura():
         db.session.add(nueva_solicitud)
         db.session.commit()
 
-        return response_success("Solicitud creada exitosamente", http_status=201)
+        # Datos para el correo de confirmación al proveedor
+        datos_confirmacion = {
+            "nombreSolicitante": data['nombre_solicitante'],
+            "noFactura": facturas_data['no_factura'],
+            "monto": f"${facturas_data['monto_factura']}",
+            "fechaSolicitud": fecha_actual.strftime("%d/%m/%Y"),
+        }
+        asunto_confirmacion = f"Confirmación de Recepción de su Solicitud de Pronto Pago FACTURA {datos_confirmacion['noFactura']}"
+        contenido_html_confirmacion = generar_plantilla('correo_confirmacion_solicitud_pp.html', datos_confirmacion)
+
+        # Enviar correo de confirmación al proveedor
+        enviar_correo(data['correo_electronico'], asunto_confirmacion, contenido_html_confirmacion)
+
+        # Datos para el correo de notificación a Synergy
+        datos_notificacion = {
+            "nombreEmpresa": "Synergy Financial Corp",
+            "proveedor": facturas_data['cliente'],
+            "noFactura": facturas_data['no_factura'],
+            "montoFactura": f"${facturas_data['monto_factura']}",
+            "fechaSolicitud": fecha_actual.strftime("%d/%m/%Y"),
+            "diasCredito": dias,
+        }
+        asunto_notificacion = f"Nueva Solicitud de Pronto Pago en Espera de Gestión FACTURA {datos_notificacion['noFactura']}"
+        contenido_html_notificacion = generar_plantilla('correo_notificacion_solicitud_pendiente_aprobacion_pp.html', datos_notificacion)
+
+        # Enviar correo de notificación a Synergy
+        enviar_correo("eliazar.rebollo23@gmail.com", asunto_notificacion, contenido_html_notificacion)
+
+        return response_success("Solicitud creada exitosamente. Los correos de confirmación y notificación han sido enviados.", http_status=201)
     except Exception as e:
         return response_error(str(e), http_status=500)
+
 
 
 

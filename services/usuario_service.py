@@ -10,6 +10,7 @@ from models.roles import Rol
 from utils.db import db
 from utils.response import response_success, response_error
 from utils.destructor import blacklist_token
+from services.email_service import *
 
 class UsuarioService:
     @staticmethod
@@ -42,12 +43,13 @@ class UsuarioService:
 
             # Generar contraseña temporal
             # temp_password = UsuarioService.generar_contraseña_temp()
-            temp_password = '12345678'
+            temp_password = '12345678'  
             print('temp_password: ', temp_password)
 
-            # Hashear la contraseña y la contraseña temporal usando hashlib con SHA-256
+            # Hashear la contraseña temporal usando hashlib con SHA-256
             salt = current_app.config['SALT_SECRET'] 
             hashed_temp_password = hashlib.sha256((temp_password + salt).encode('utf-8')).hexdigest()
+
             # Crear el nuevo usuario
             nuevo_usuario = Usuario(
                 nombre_completo=nombre_completo,
@@ -61,6 +63,18 @@ class UsuarioService:
             db.session.add(nuevo_usuario)
             db.session.commit()
 
+            # Enviar correo con las credenciales al usuario
+            datos_credenciales = {
+                "nombreUsuario": nombre_completo,
+                "correoElectronico": email,
+                "contrasenaTemporal": temp_password,
+            }
+            asunto = f"Credenciales de acceso al sistema de pronto pago"
+            contenido_html_credenciales = generar_plantilla('correo_contraseña_temporal.html', datos_credenciales)
+
+            # Enviar el correo
+            enviar_correo(email, asunto, contenido_html_credenciales)
+
             # Retornar detalles del usuario creado (sin incluir contraseñas)
             respuesta = {
                 "usuario_id": nuevo_usuario.id,
@@ -69,10 +83,11 @@ class UsuarioService:
                 "cargo": nuevo_usuario.cargo,
                 "id_rol": nuevo_usuario.id_rol
             }
-            return response_success(respuesta, "Usuario creado exitosamente", http_status=201)
+            return response_success(respuesta, "Usuario creado exitosamente. Las credenciales han sido enviadas al correo registrado.", http_status=201)
         except Exception as e:
             db.session.rollback()
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
         
     @staticmethod
     def inicio_sesion(data):
