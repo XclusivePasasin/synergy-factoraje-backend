@@ -107,28 +107,30 @@ def obtener_detalle_solicitud():
 
         # Construir los datos de respuesta
         solicitud_data = {
-            "id": solicitud.id,
-            "nombre_cliente": solicitud.nombre_cliente,
-            "contacto": solicitud.contacto,
-            "email": solicitud.email,
-            "iva": float(solicitud.iva),
-            "subtotal": float(solicitud.subtotal),
-            "total": float(solicitud.total),
-            "estado": solicitud.estado.clave if solicitud.estado else None,
-            "id_estado": solicitud.id_estado,
-            "factura": {
-                "id": solicitud.factura.id,
-                "no_factura": solicitud.factura.no_factura,
-                "monto": float(solicitud.factura.monto),
-                "fecha_emision": solicitud.factura.fecha_emision.isoformat(),
-                "fecha_vence": solicitud.factura.fecha_vence.isoformat(),
-                "proveedor": {
-                    "id": solicitud.factura.proveedor.id,
-                    "razon_social": solicitud.factura.proveedor.razon_social,
-                    "correo_electronico": solicitud.factura.proveedor.correo_electronico,
-                    "telefono": solicitud.factura.proveedor.telefono,
-                }
-            } if solicitud.factura else None
+            "solicitud": {
+                "id": solicitud.id,
+                "nombre_cliente": solicitud.nombre_cliente,
+                "contacto": solicitud.contacto,
+                "email": solicitud.email,
+                "iva": float(solicitud.iva),
+                "subtotal": float(solicitud.subtotal),
+                "total": float(solicitud.total),
+                "estado": solicitud.estado.clave if solicitud.estado else None,
+                "id_estado": solicitud.id_estado,
+                "factura": {
+                    "id": solicitud.factura.id,
+                    "no_factura": solicitud.factura.no_factura,
+                    "monto": float(solicitud.factura.monto),
+                    "fecha_emision": solicitud.factura.fecha_emision.isoformat(),
+                    "fecha_vence": solicitud.factura.fecha_vence.isoformat(),
+                    "proveedor": {
+                        "id": solicitud.factura.proveedor.id,
+                        "razon_social": solicitud.factura.proveedor.razon_social,
+                        "correo_electronico": solicitud.factura.proveedor.correo_electronico,
+                        "telefono": solicitud.factura.proveedor.telefono,
+                    }
+                } if solicitud.factura else None
+            }
         }
 
         return response_success(solicitud_data, "Consulta exitosa")
