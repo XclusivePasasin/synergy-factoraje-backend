@@ -2,7 +2,11 @@ from flask import Blueprint, request
 from sqlalchemy import or_, and_
 from utils.db import db
 from utils.response import response_success, response_error
-from models import Solicitud, Desembolso, Factura, ProveedorCalificado
+from models.solicitudes import Solicitud
+from models.desembolsos import Desembolso
+from models.facturas import Factura
+from models.proveedores_calificados import ProveedorCalificado
+from models.estados import Estado
 from utils.interceptor import token_required
 
 desembolsos_bp = Blueprint('desembolso', __name__)
@@ -20,7 +24,7 @@ def obtener_desembolsos():
         proveedor = request.args.get('proveedor', type=str)
 
         # Construcción de filtros dinámicos
-        query = Desembolso.query.join(Solicitud).join(Factura).join(ProveedorCalificado)
+        query = Desembolso.query.join(Solicitud).join(Factura).join(ProveedorCalificado).join(Solicitud.estado)
 
         if fecha_inicio and fecha_fin:
             query = query.filter(Desembolso.fecha_desembolso.between(fecha_inicio, fecha_fin))
@@ -60,7 +64,8 @@ def obtener_desembolsos():
                         "iva": float(desembolso.solicitud.iva),
                         "subtotal": float(desembolso.solicitud.subtotal),
                         "total": float(desembolso.solicitud.total),
-                        "estado": desembolso.solicitud.estado.estado,
+                        "id_estado": desembolso.solicitud.id_estado,
+                        "estado": desembolso.solicitud.estado.clave if desembolso.solicitud.estado else None,
                         "factura": {
                             "id": desembolso.solicitud.factura.id,
                             "no_factura": desembolso.solicitud.factura.no_factura,
@@ -88,21 +93,39 @@ def obtener_desembolsos():
 @token_required
 def obtener_detalle_desembolso():
     try:
-        # Recuperar el ID de la solicitud desde los parámetros de consulta
-        solicitud_id = request.args.get('solicitud_id', type=int)
+        # Recuperar el ID del desembolso desde los parámetros de consulta
+        desembolso_id = request.args.get('desembolso_id', type=int)
         
-        if not solicitud_id:
-            return response_error("El parámetro 'solicitud_id' es requerido", http_status=400)
+        if not desembolso_id:
+            return response_error("El parámetro 'desembolso_id' es requerido", http_status=400)
 
-        # Buscar el desembolso relacionado con la solicitud
-        desembolso = Desembolso.query.join(Solicitud).join(Factura).join(ProveedorCalificado).filter(
-            Desembolso.id_solicitud == solicitud_id
+        # Realizar la consulta con los joins necesarios
+        desembolso = db.session.query(
+            Desembolso.id,
+            Desembolso.fecha_desembolso,
+            Desembolso.monto_final,
+            Desembolso.metodo_pago,
+            Desembolso.no_transaccion,
+            Desembolso.estado,
+            ProveedorCalificado.id.label('proveedor_id'),
+            ProveedorCalificado.razon_social,
+            ProveedorCalificado.correo_electronico,
+            ProveedorCalificado.telefono
+        ).join(
+            Solicitud, Desembolso.id_solicitud == Solicitud.id
+        ).join(
+            Factura, Solicitud.id_factura == Factura.id
+        ).join(
+            ProveedorCalificado, Factura.id_proveedor == ProveedorCalificado.id
+        ).filter(
+            Desembolso.id == desembolso_id
         ).first()
 
+        # Verificar si el desembolso fue encontrado
         if not desembolso:
-            return response_error("Desembolso no encontrado para la solicitud indicada", http_status=404)
+            return response_error("Desembolso no encontrado para el ID indicado", http_status=404)
 
-        # Construir la respuesta detallada
+        # Construir la respuesta con los datos obtenidos
         response_data = {
             "desembolso": {
                 "id": desembolso.id,
@@ -112,10 +135,10 @@ def obtener_detalle_desembolso():
                 "no_transaccion": desembolso.no_transaccion,
                 "estado": desembolso.estado,
                 "proveedor": {
-                    "id": desembolso.solicitud.factura.proveedor.id,
-                    "razon_social": desembolso.solicitud.factura.proveedor.razon_social,
-                    "correo_electronico": desembolso.solicitud.factura.proveedor.correo_electronico,
-                    "telefono": desembolso.solicitud.factura.proveedor.telefono
+                    "id": desembolso.proveedor_id,
+                    "razon_social": desembolso.razon_social,
+                    "correo_electronico": desembolso.correo_electronico,
+                    "telefono": desembolso.telefono
                 }
             }
         }
@@ -124,4 +147,5 @@ def obtener_detalle_desembolso():
 
     except Exception as e:
         return response_error(f"Error al obtener el detalle del desembolso: {str(e)}", http_status=500)
+
     

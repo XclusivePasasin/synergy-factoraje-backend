@@ -7,6 +7,7 @@ from models.usuarios import Usuario
 from models.permisos import Permiso
 from models.menus import Menu
 from models.roles import Rol
+from models.parametros import Parametro
 from utils.db import db
 from utils.response import response_success, response_error
 from utils.destructor import blacklist_token
@@ -42,7 +43,6 @@ class UsuarioService:
                 return response_error("El correo ya está registrado", http_status=409)
 
             # Generar contraseña temporal
-            # temp_password = UsuarioService.generar_contraseña_temp()
             temp_password = '12345678'  
             print('temp_password: ', temp_password)
 
@@ -63,11 +63,19 @@ class UsuarioService:
             db.session.add(nuevo_usuario)
             db.session.commit()
 
+            # Obtener el valor de la clave NOM-EMPRESA
+            parametro_nombre_empresa = Parametro.query.filter_by(clave='NOM-EMPRESA').first()
+            if not parametro_nombre_empresa:
+                return response_error("No se encontró el parámetro NOM-EMPRESA", http_status=500)
+
+            nombre_empresa = parametro_nombre_empresa.valor
+
             # Enviar correo con las credenciales al usuario
             datos_credenciales = {
                 "nombreUsuario": nombre_completo,
                 "correoElectronico": email,
                 "contrasenaTemporal": temp_password,
+                "nombreEmpresa": nombre_empresa,  # Incluir el nombre de la empresa
             }
             asunto = f"Credenciales de acceso al sistema de pronto pago"
             contenido_html_credenciales = generar_plantilla('correo_contraseña_temporal.html', datos_credenciales)
