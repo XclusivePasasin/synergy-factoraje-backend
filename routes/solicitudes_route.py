@@ -1,4 +1,5 @@
 from flask import Flask, request, Blueprint
+from models.parametros import Parametro
 from utils.db import db
 from models.solicitudes import Solicitud
 from models.facturas import Factura
@@ -177,6 +178,14 @@ def aprobar_solicitud():
 
         # Guardar cambios en la base de datos
         db.session.commit()
+        
+        # Obtener los parámetros adicionales de la base de datos
+        parametros = Parametro.query.filter(Parametro.clave.in_(['NOM-EMPRESA', 'ENC-EMPRESA', 'TEL-EMPRESA'])).all()
+        parametros_dict = {param.clave: param.valor for param in parametros}
+
+        nombre_empresa = parametros_dict.get('NOM-EMPRESA', 'Nombre Empresa No Definido')
+        nombre_encargado = parametros_dict.get('ENC-EMPRESA', 'Encargado No Definido')
+        telefono_empresa = parametros_dict.get('TEL-EMPRESA', 'Teléfono No Definido')
 
         # Enviar correo al usuario notificando la aprobación
         datos_aprobacion = {
@@ -188,7 +197,10 @@ def aprobar_solicitud():
             "subtotal": f"${solicitud.subtotal:.2f}",
             "fechaSolicitud": solicitud.fecha_solicitud.strftime("%d/%m/%Y"),
             "fechaVencimiento": solicitud.factura.fecha_vence.strftime("%d/%m/%Y"),
-            "diasCredito": (solicitud.factura.fecha_vence - solicitud.fecha_aprobacion).days
+            "diasCredito": (solicitud.factura.fecha_vence - solicitud.fecha_aprobacion).days,
+            "nombreEmpresa": nombre_empresa,
+            "nombreEncargadoEmpresa": nombre_encargado,
+            "telefonoEmpresa": telefono_empresa
         }
         asunto = f"Solicitud de Pronto Pago Aprobada FACTURA {datos_aprobacion['noFactura']}"
         contenido_html_aprobacion = generar_plantilla('correo_aprobacion_solicitud_pp.html', datos_aprobacion)
@@ -262,6 +274,14 @@ def desaprobar_solicitud():
 
         # Guardar cambios en la base de datos
         db.session.commit()
+        
+        # Obtener los parámetros adicionales de la base de datos
+        parametros = Parametro.query.filter(Parametro.clave.in_(['NOM-EMPRESA', 'ENC-EMPRESA', 'TEL-EMPRESA'])).all()
+        parametros_dict = {param.clave: param.valor for param in parametros}
+
+        nombre_empresa = parametros_dict.get('NOM-EMPRESA', 'Nombre Empresa No Definido')
+        nombre_encargado = parametros_dict.get('ENC-EMPRESA', 'Encargado No Definido')
+        telefono_empresa = parametros_dict.get('TEL-EMPRESA', 'Teléfono No Definido')
 
         # Enviar correo al usuario notificando la denegación
         datos_denegacion = {
@@ -269,6 +289,9 @@ def desaprobar_solicitud():
             "noFactura": solicitud.factura.no_factura,
             "montoFactura": f"${solicitud.total:.2f}",
             "fechaSolicitud": solicitud.fecha_solicitud.strftime("%d/%m/%Y"),
+            "nombreEmpresa": nombre_empresa,
+            "nombreEncargadoEmpresa": nombre_encargado,
+            "telefonoEmpresa": telefono_empresa
         }
         asunto = f"Solicitud de Pronto Pago Denegada FACTURA {datos_denegacion['noFactura']}"
         contenido_html_denegacion = generar_plantilla('correo_denegacion_solicitud_pp.html', datos_denegacion)

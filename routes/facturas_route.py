@@ -131,12 +131,24 @@ def solicitar_pago_factura():
         db.session.add(nueva_solicitud)
         db.session.commit()
 
+        # Obtener los parámetros adicionales de la base de datos
+        parametros = Parametro.query.filter(Parametro.clave.in_(['NOM-EMPRESA', 'ENC-EMPRESA', 'TEL-EMPRESA','MAIL-EMPRESA'])).all()
+        parametros_dict = {param.clave: param.valor for param in parametros}
+
+        nombre_empresa = parametros_dict.get('NOM-EMPRESA', 'Nombre Empresa No Definido')
+        nombre_encargado = parametros_dict.get('ENC-EMPRESA', 'Encargado No Definido')
+        telefono_empresa = parametros_dict.get('TEL-EMPRESA', 'Teléfono No Definido')
+        email_empresa = parametros_dict.get('MAIL-EMPRESA', 'Email No Definido')
+
         # Datos para el correo de confirmación al proveedor
         datos_confirmacion = {
             "nombreSolicitante": data['nombre_solicitante'],
             "noFactura": facturas_data['no_factura'],
             "monto": f"${facturas_data['monto_factura']}",
             "fechaSolicitud": fecha_actual.strftime("%d/%m/%Y"),
+            "nombreEmpresa": nombre_empresa,
+            "nombreEncargadoEmpresa": nombre_encargado,
+            "telefonoEmpresa": telefono_empresa,
         }
         asunto_confirmacion = f"Confirmación de Recepción de su Solicitud de Pronto Pago FACTURA {datos_confirmacion['noFactura']}"
         contenido_html_confirmacion = generar_plantilla('correo_confirmacion_solicitud_pp.html', datos_confirmacion)
@@ -146,18 +158,19 @@ def solicitar_pago_factura():
 
         # Datos para el correo de notificación a Synergy
         datos_notificacion = {
-            "nombreEmpresa": "Synergy Financial Corp",
+            "nombreEmpresa": nombre_empresa,
             "proveedor": facturas_data['cliente'],
             "noFactura": facturas_data['no_factura'],
             "montoFactura": f"${facturas_data['monto_factura']}",
             "fechaSolicitud": fecha_actual.strftime("%d/%m/%Y"),
             "diasCredito": dias,
+            "nombreEmpresa": nombre_empresa
         }
         asunto_notificacion = f"Nueva Solicitud de Pronto Pago en Espera de Gestión FACTURA {datos_notificacion['noFactura']}"
         contenido_html_notificacion = generar_plantilla('correo_notificacion_solicitud_pendiente_aprobacion_pp.html', datos_notificacion)
 
         # Enviar correo de notificación a Synergy
-        enviar_correo("eliazar.rebollo23@gmail.com", asunto_notificacion, contenido_html_notificacion)
+        enviar_correo(email_empresa, asunto_notificacion, contenido_html_notificacion)
 
         return response_success("Solicitud creada exitosamente. Los correos de confirmación y notificación han sido enviados.", http_status=201)
     except Exception as e:
