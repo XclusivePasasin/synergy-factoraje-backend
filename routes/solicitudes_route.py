@@ -120,9 +120,10 @@ def obtener_detalle_solicitud():
                 "factura": {
                     "id": solicitud.factura.id,
                     "no_factura": solicitud.factura.no_factura,
-                    "monto": float(solicitud.factura.monto),
-                    "fecha_emision": solicitud.factura.fecha_emision.isoformat(),
-                    "fecha_vence": solicitud.factura.fecha_vence.isoformat(),
+                    "fecha_otorgamiento": solicitud.factura.fecha_otorga.strftime("%d/%m/%Y"),
+                    "fecha_vencimiento": solicitud.factura.fecha_vence.strftime("%d/%m/%Y"),
+                    "monto_factura": float(solicitud.factura.monto),
+                    "pronto_pago": float(solicitud.subtotal) - float(solicitud.iva),
                     "proveedor": {
                         "id": solicitud.factura.proveedor.id,
                         "razon_social": solicitud.factura.proveedor.razon_social,
@@ -159,9 +160,10 @@ def aprobar_solicitud():
         if not solicitud:
             return response_error("La solicitud no existe", http_status=404)
 
-        # Validar si la solicitud ya está aprobada
-        if solicitud.id_estado == 2:  
-            return response_success(None, "La solicitud ya fue aprobada. No se realizó ningún cambio.")
+         # Validar si la solicitud ya está aprobada o denegada
+        if solicitud.id_estado in [2, 3]:
+            estado = "aprobada" if solicitud.id_estado == 2 else "denegada"
+            return response_error(f"La solicitud ya fue {estado}. No se puede cambiar su estado.", http_status=409)
 
         # Actualizar el estado de la solicitud
         solicitud.id_estado = 2  
@@ -257,8 +259,9 @@ def desaprobar_solicitud():
             return response_error("La solicitud no existe", http_status=404)
 
         # Validar si la solicitud ya está denegada
-        if solicitud.id_estado == 3:  
-            return response_success(None, "La solicitud ya fue denegada. No se realizó ningún cambio.")
+        if solicitud.id_estado in [2, 3]:
+            estado = "aprobada" if solicitud.id_estado == 2 else "denegada"
+            return response_error(f"La solicitud ya fue {estado}. No se puede cambiar su estado.", http_status=409)
 
         # Actualizar el estado de la solicitud
         solicitud.id_estado = 3  

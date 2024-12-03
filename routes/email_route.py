@@ -24,7 +24,7 @@ def enviar_email():
             'nombreEmpresa', 'noFactura', 'monto', 
             'fechaOtorgamiento', 'fechaVencimiento', 
             'diasCredito'
-        ]  # Eliminamos 'linkBoton' de los campos requeridos ya que lo generaremos.
+        ]  
         
         for campo in campos_datos:
             if campo not in datos_plantilla:
