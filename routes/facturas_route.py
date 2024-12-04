@@ -17,7 +17,7 @@ def obtener_detalle_factura():
         # Obtener el parámetro no_factura desde la URL
         no_factura = request.args.get('no_factura')
         if not no_factura:
-            return response_error("El parámetro no_factura es obligatorio", http_status=422)
+            return response_error("El parámetro no_factura es obligatorio", http_status=409)
 
         # Consulta para obtener los detalles de la factura
         factura = Factura.query.filter_by(no_factura=no_factura).first()
@@ -28,7 +28,7 @@ def obtener_detalle_factura():
         fecha_actual = datetime.now()
         dias_restantes = (factura.fecha_vence - fecha_actual).days
         if dias_restantes < 0:
-            return response_error("La fecha de vencimiento ya pasó", http_status=422)
+            return response_error("La fecha de vencimiento ya pasó", http_status=409)
 
         # Obtener el parámetro de interés anual
         parametro = Parametro.query.filter_by(clave='INT_AN_PP').first()
@@ -68,7 +68,7 @@ def solicitar_pago_factura():
 
         # Validar que el nodo "data" y "factura" existan en el JSON
         if 'data' not in datos or 'factura' not in datos['data']:
-            return response_error("El nodo 'data.factura' es obligatorio", http_status=422)
+            return response_error("El nodo 'data.factura' es obligatorio", http_status=409)
 
         data = datos['data']
 
@@ -76,7 +76,7 @@ def solicitar_pago_factura():
         campos_adicionales = ['nombre_solicitante', 'cargo', 'correo_electronico']
         for campo in campos_adicionales:
             if campo not in data:
-                return response_error(f"El campo {campo} en 'data' es obligatorio", http_status=422)
+                return response_error(f"El campo {campo} en 'data' es obligatorio", http_status=409)
 
         # Validar los campos requeridos dentro de "factura"
         facturas_data = data['factura']
@@ -86,12 +86,12 @@ def solicitar_pago_factura():
         ]
         for campo in campos_factura:
             if campo not in facturas_data:
-                return response_error(f"El campo {campo} en 'factura' es obligatorio", http_status=422)
+                return response_error(f"El campo {campo} en 'factura' es obligatorio", http_status=409)
 
         # Validar que la factura exista por no_factura
         factura_existente = Factura.query.filter_by(no_factura=facturas_data['no_factura']).first()
         if not factura_existente:
-            return response_error("La solicitud proporcionada no existe en la base de datos", http_status=422)
+            return response_error("La solicitud proporcionada no existe en la base de datos", http_status=409)
 
         # Validar que la solicitud no exista ya para esa factura
         solicitud_existente = Solicitud.query.filter_by(id_factura=factura_existente.id).first()
@@ -102,15 +102,15 @@ def solicitar_pago_factura():
         try:
             fecha_vencimiento = datetime.strptime(facturas_data['fecha_vencimiento'], "%d/%m/%Y")
         except ValueError:
-            return response_error("Formato de fecha inválido. Use DD/MM/YYYY", http_status=422)
+            return response_error("Formato de fecha inválido. Use DD/MM/YYYY", http_status=409)
 
         fecha_actual = datetime.now()
         if fecha_actual > fecha_vencimiento:
-            return response_error("El tiempo de otorgamiento ha expirado", http_status=422)
+            return response_error("El tiempo de otorgamiento ha expirado", http_status=409)
 
         dias = (fecha_vencimiento - fecha_actual).days
         if dias < 0:
-            return response_error("La fecha de vencimiento ya pasó", http_status=422)
+            return response_error("La fecha de vencimiento ha expirado", http_status=409)
 
         # Crear la nueva solicitud
         nueva_solicitud = Solicitud(
