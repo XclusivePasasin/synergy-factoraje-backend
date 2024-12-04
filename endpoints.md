@@ -4,21 +4,28 @@
 
 ### **Enviar correo electrónico de factura**
 **Endpoint:** `POST /api/email/enviar-email`
-**Descripción:** Envia un correo electrónico con los datos de la solicitud de factura.
+**Descripción:** Envia un correo electrónico con los datos de la factura para notificar al proveedor que 
+su factura está disponible para aplicar a pronto pago.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
 
 **Request Body:**
 ```json
 {
-    "destinatario": "example@gmail.com",
+    "destinatario": "test@test.com",
     "asunto": "Opción de Pronto Pago Disponible",
     "datos": {
         "nombreEmpresa": "Clobi Technologies S.A. de C.V.",
-        "noFactura": "11111",
+        "noFactura": "FAC001",
         "monto": "10000.00",
         "fechaOtorgamiento": "20/11/2024",
         "fechaVencimiento": "19/02/2025",
-        "diasCredito": "91",
-        "linkBoton": "https://ejemplo.com/pronto-pago"
+        "diasCredito": "10"
     }
 }
 
@@ -27,12 +34,17 @@
 ## Endpoint Solicitud de Pago
 
 ### **Obtener detalles pronto pago de la factura**
-**Endpoint:** `GET /api/factura/obtener-detalle-factura?no_factura=555`
-**Descripción:** Recibe un JSON con los datos de la factura que se desea obtener los detalles de la factura y devuelve un JSON con los resultados de la factura.
+**Endpoint:** `GET /api/factura/obtener-detalle-factura`
+**Descripción:** Obtiene los detalles de la factura en base a los parámetros proporcionados.
 
-**Request Body:**
+**Query Parameters (Obligatorio):**
+- 'no_factura': Numero de la factura que se desea obtener los detalles.
+
+**Headers:**
 ```json
-
+{
+    "Authorization": "Bearer <access_token>"
+}
 ```
 
 **Response:**
@@ -41,16 +53,16 @@
     "code": 0,
     "data": {
         "factura": {
-            "cliente": "Clobi Technologies S.A. de C.V.",
-            "dias_restantes": 87,
-            "fecha_otorgamiento": "20/11/2024",
-            "fecha_vencimiento": "18/02/2025",
-            "iva": 84.83,
-            "monto_factura": 15000.0,
-            "no_factura": "555",
-            "pronto_pago": 652.5,
-            "subtotal_descuento": 737.33,
-            "total_a_recibir": 14262.67
+            "descuento_pp": 33.0,
+            "dias_restantes": 44,
+            "fecha_otorga": "01/11/2024",
+            "fecha_vence": "18/01/2025",
+            "iva": 4.29,
+            "monto": 1500.0,
+            "no_factura": "FAC001",
+            "nombre_proveedor": "TechNova Solutions S.A.",
+            "subtotal": 37.29,
+            "total": 1462.71
         }
     },
     "message": "Detalle de factura obtenido correctamente"
@@ -59,7 +71,7 @@
 
 ### **Solicitar Solicitud de Pronto Pago**
 **Endpoint:** `POST /api/solicitud/solicitar-pago-factura`
-**Descripción:** Solicita una factura de pronto pago.
+**Descripción:** Crea una solicitud de pronto pago para la factura que se desea solicitar.
 
 **Headers:**
 ```json
@@ -71,49 +83,23 @@
 **request Body:**
 ```json
 {
-    "data": {
+   "data": {
         "factura": {
-            "cliente": "CodeFusion Labs",
-            "dias_restantes": 55,
-            "fecha_otorgamiento": "05/11/2024",
-            "fecha_vencimiento": "19/01/2025",
-            "iva": 10.72,
-            "monto_factura": 3000.0,
-            "no_factura": "FAC002",
-            "pronto_pago": 82.5,
-            "subtotal_descuento": 93.22,
-            "total_a_recibir": 2906.78
+            "nombre_proveedor": "TechNova Solutions S.A.",
+            "dias_restantes": 47,
+            "fecha_otorga": "01/11/2024",
+            "fecha_vence": "18/01/2025",
+            "iva": 4.58,
+            "monto": 1500.0,
+            "no_factura": "FAC001",
+            "descuento_app": 35.25,
+            "subtotal": 39.83,
+            "total": 1460.17
         },
-        "nombre_solicitante": "Misael Gutierrez",
-        "cargo": "Ingeniero Software",
-        "correo_electronico": "misael.gutierrez@clobi.cl"
+       "nombre_solicitante": "Eliazar Antonio Rebollo Pasasin",
+       "cargo": "Programador",
+       "email": "eliazar.rebollo23@gmail.com"
     }
-}
-```
-
-**Response (success):**
-```json
-{
-    "code": 0,
-    "data": {
-        "cargo": "Ingeniero Software",
-        "correo_electronico": "misael.gutierrez@clobi.cl",
-        "factura": {
-            "cliente": "CodeFusion Labs",
-            "dias_restantes": 51,
-            "fecha_otorgamiento": "05/11/2024",
-            "fecha_vencimiento": "19/01/2025",
-            "iva": 10.72,
-            "monto_factura": 3000.0,
-            "no_factura": "FAC002",
-            "pronto_pago": 82.5,
-            "subtotal_descuento": 93.22,
-            "total_a_recibir": 2906.78
-        },
-        "nombre_solicitante": "Misael Gutierrez",
-        "telefono_proveedor": "555-67891"
-    },
-    "message": "Solicitud creada exitosamente"
 }
 ```
 
@@ -292,18 +278,12 @@
 }
 ```
 
-**Response (error):**
-```json
-{
-    "code": 1,
-    "data": null,
-    "message": "El usuario no existe"
-}
-```
-
 ### **Cerrar Sesión**
-**Endpoint:** `POST /api/usuario/cerrar-sesion?usuario_id=1`  
+**Endpoint:** `POST /api/usuario/cerrar-sesion`  
 **Descripción:** Cierra la session del usuario.
+
+**Query Parameters (Obligatorio):**
+- 'usuario_id': ID del usuario que se desea cerrar la sesión.
 
 **Headers:**
 ```json
@@ -342,10 +322,10 @@
 - 'fecha_inicio', `fecha_fin`: Rango de fechas.
 - 'estado': Filtrar por estado.
 - 'no_factura': Filtrar por número de factura.
-- 'nombre_proveedor': nombre proveedor
-- 'nrc': 
-- 'telefono':
-- 'correo':
+- 'nombre_proveedor': Nombre proveedor
+- 'nrc' NRC del proveedor.
+- 'telefono' Teléfono del proveedor.
+- 'email' Email del solicitante.
 
 **Response (success):**
 ```json
@@ -356,34 +336,33 @@
         "per_page": 10,
         "solicitudes": [
             {
-                "contacto": "555-67891",
-                "email": "misael.gutierrez@clobi.cl",
+                "email": "test@test.com",
                 "estado": "PENDIENTE",
                 "factura": {
-                    "fecha_emision": "2024-11-05T09:00:00",
-                    "fecha_otorga": "2024-11-05T09:30:00",
-                    "fecha_vence": "2025-01-19T09:00:00",
-                    "id": 2,
-                    "monto": 3000.0,
-                    "no_factura": "FAC002",
+                    "fecha_emision": "2024-11-01T10:00:00",
+                    "fecha_otorga": "2024-11-01T11:00:00",
+                    "fecha_vence": "2025-01-18T10:00:00",
+                    "id": 1,
+                    "monto": 1500.0,
+                    "no_factura": "FAC001",
                     "proveedor": {
-                        "correo_electronico": "info@futuretech.com",
-                        "id": 2,
-                        "max_factoring": "8000.00",
-                        "min_factoring": "2000.00",
-                        "nit": "NIT987654321",
-                        "nombre_contacto": "Sofía Ramírez",
-                        "nrc": "NRC67891",
-                        "razon_social": "FutureTech Innovators",
-                        "telefono": "555-67891"
+                        "correo_electronico": "contacto@technova.com",
+                        "id": 1,
+                        "max_factoring": "5000.00",
+                        "min_factoring": "1000.00",
+                        "nit": "NIT456789123",
+                        "nombre_contacto": "Juan Pérez",
+                        "nrc": "NRC12345",
+                        "razon_social": "TechNova Solutions S.A.",
+                        "telefono": "555-12345"
                     }
                 },
                 "id": 4,
                 "id_estado": 1,
-                "iva": 10.72,
-                "nombre_cliente": "Misael Gutierrez",
-                "subtotal": 93.22,
-                "total": 2906.78
+                "iva": 4.58,
+                "nombre_cliente": "Eliazar Pasasin",
+                "subtotal": 39.83,
+                "total": 1460.17
             }
         ],
         "total_pages": 1
@@ -395,6 +374,9 @@
 **Endpoint:** `GET /api/solicitud/obtener-detalle-solicitud?id=`
 **Descripción:** Devuelve los detalles de una solicitud específica.
 
+**Query Parameters (Obligatorio):**
+- 'id': Numero de la solicitud que se desea obtener los detalles.
+
 **Headers:**
 ```json
 {
@@ -407,36 +389,41 @@
 {
     "code": 0,
     "data": {
-        "contacto": "555-67891",
-        "email": "misael.gutierrez@clobi.cl",
-        "estado": "PENDIENTE",
-        "factura": {
-            "fecha_emision": "2024-11-05T09:00:00",
-            "fecha_vence": "2025-01-19T09:00:00",
-            "id": 2,
-            "monto": 3000.0,
-            "no_factura": "FAC002",
-            "proveedor": {
-                "correo_electronico": "info@futuretech.com",
-                "id": 2,
-                "razon_social": "FutureTech Innovators",
-                "telefono": "555-67891"
-            }
-        },
-        "id": 4,
-        "id_estado": 1,
-        "iva": 10.72,
-        "nombre_cliente": "Misael Gutierrez",
-        "subtotal": 93.22,
-        "total": 2906.78
+        "solicitud": {
+            "email": "test@test.com",
+            "estado": "PENDIENTE",
+            "factura": {
+                "fecha_otorga": "01/11/2024",
+                "fecha_vence": "18/01/2025",
+                "id": 1,
+                "monto": 1500.0,
+                "no_factura": "FAC001",
+                "pronto_pago": 35.25,
+                "proveedor": {
+                    "correo_electronico": "contacto@technova.com",
+                    "id": 1,
+                    "razon_social": "TechNova Solutions S.A.",
+                    "telefono": "555-12345"
+                }
+            },
+            "id": 4,
+            "id_estado": 1,
+            "iva": 4.58,
+            "nombre_cliente": "Eliazar Pasasin",
+            "subtotal": 39.83,
+            "total": 1460.17
+        }
     },
     "message": "Consulta exitosa"
 }
 ```
 
 ### **Aprobar una solicitud**
-**Endpoint:** `PUT /api/solicitud/aprobar?id=2`
+**Endpoint:** `PUT /api/solicitud/aprobar`
 **Descripción:** Cambia el estado de la solicitud a Aprobada y puede registrar información adicional sobre quién aprobó la solicitud.
+
+**Query Parameters (Obligatorio):**
+- 'id': Numero de la solicitud que se desea aprobar.
 
 **Headers:**
 ```json
@@ -448,44 +435,46 @@
 **Body (JSON):**
 ```json
 {
-  "id_aprobador": 5, // ID del usuario que aprueba la solicitud
-  "comentario": "Documentacion satisfactoria" // (opcional) si esta definido agregarlo a la tabla de comentarios
+  "id_aprobador": 5, 
+  "comentario": "Documentacion satisfactoria"
 }
 ```
 
 **Response:**
 ```json
-
 {
-    "data":{
-        "solicitud":{
-            "id": 1,
-            "nombre_cliente": "John Doe",
-            "contacto": "12345678",
-            "email": "john.doe@example.com",
-            "estado": "Aprobada",
-            "id_estado": 1,
-            "fecha_aprobacion": "2024-11-18",
-            "total": 1000.50,
+    "code": 0,
+    "data": {
+        "solicitud": {
+            "contacto": "555-12345",
+            "email": "eliazar.rebollo23@gmail.com",
             "factura": {
+                "id": 1,
+                "monto": 1500.0,
+                "no_factura": "FAC001",
+                "proveedor": {
                     "id": 1,
-                    "no_factura": "FAC123",
-                    "monto": 500.00,
-                    "proveedor": {
-                        "id": 10,
-                        "razon_social": "Proveedor S.A."
-                    }
-            }
+                    "razon_social": "TechNova Solutions S.A."
+                }
+            },
+            "fecha_aprobacion": "2024-12-04T16:12:34",
+            "id": 6,
+            "id_aprobador": 1,
+            "id_estado": 2,
+            "nombre_cliente": "Eliazar Antonio Rebollo Pasasin",
+            "total": 1460.17
         }
     },
-    "message": "Solicitud aprobada exitosamente."
+    "message": "Solicitud aprobada exitosamente. Correo de notificación enviado."
 }
-
 ```
 
 ### **Denegar una solicitud**
-**Endpoint:** `PUT /api/solicitud/denegar?id=2`
+**Endpoint:** `PUT /api/solicitud/denegar`
 **Descripción:** Cambia el estado de la solicitud a Denegada y permite registrar una razón para la denegación.
+
+**Query Parameters (Obligatorio):**
+- 'id': Numero de la solicitud que se desea denegar.
 
 **Headers:**
 ```json
@@ -497,37 +486,34 @@
 **Body (JSON):**
 ```json
 {
-  "id_aprobador": 5, // ID del usuario que deniega la solicitud
-  "comentario": "Documentación incompleta." // (opcional) si esta definido agregarlo a la tabla de comentarios
+  "comentario": "Documentación incompleta."  // (opcional) 
 }
 
 ```
 
 **Response:**
 ```json
-
 {
-    "data":{
-        "solicitud":{
-            "id": 5,
-            "nombre_cliente": "John Doe",
-            "contacto": "12345678",
-            "email": "john.doe@example.com",
-            "estado": "Denegada",
-            "id_estado": 1,
-            "fecha_aprobacion": "2024-11-18",
-            "total": 1000.50,
+    "code": 0,
+    "data": {
+        "solicitud": {
+            "contacto": "555-12345",
+            "email": "eliazar.rebollo23@gmail.com",
             "factura": {
+                "id": 1,
+                "monto": 1500.0,
+                "no_factura": "FAC001",
+                "proveedor": {
                     "id": 1,
-                    "no_factura": "FAC123",
-                    "monto": 500.00,
-                    "proveedor": {
-                        "id": 10,
-                        "razon_social": "Proveedor S.A."
-                    }
-            }
+                    "razon_social": "TechNova Solutions S.A."
+                }
+            },
+            "id": 5,
+            "id_estado": 3,
+            "nombre_cliente": "Eliazar Antonio Rebollo Pasasin",
+            "total": 1460.17
         }
     },
-    "message": "Solicitud denegada."
+    "message": "Solicitud denegada exitosamente. Correo de notificación enviado."
 }
 ```
