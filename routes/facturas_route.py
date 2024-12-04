@@ -4,12 +4,9 @@ from datetime import datetime
 from models.parametros import Parametro
 from models.solicitudes import Solicitud
 from models.facturas import Factura
-from models.usuarios import Usuario
-from models.roles import Rol
 from utils.db import db
 from utils.response import response_success, response_error
 from utils.interceptor import token_required
-from services.email_service import *
 
 facturas_bp = Blueprint('factura', __name__)
 
@@ -49,13 +46,13 @@ def obtener_detalle_factura():
         # Preparar los detalles de la factura dentro del nodo "facturas"
         resultado_final = {
             "factura": {
-                "nombre_proveedor": factura.nombre_proveedor,
+                "cliente": factura.nombre_proveedor,
                 "no_factura": factura.no_factura,
                 "dias_restantes": dias_restantes,
-                "fecha_otorga": factura.fecha_otorga.strftime("%d/%m/%Y"),
-                "fecha_vence": factura.fecha_vence.strftime("%d/%m/%Y"),
-                "monto": float(factura.monto),
-                **resultado 
+                "fecha_otorgamiento": factura.fecha_otorga.strftime("%d/%m/%Y"),
+                "fecha_vencimiento": factura.fecha_vence.strftime("%d/%m/%Y"),
+                "monto_factura": float(factura.monto),
+                **resultado  # Incluye los cálculos realizados por metrica_factura
             }
         }
 
@@ -69,20 +66,23 @@ def solicitar_pago_factura():
     try:
         datos = request.json
 
+        # Validar que el nodo "data" y "factura" existan en el JSON
         if 'data' not in datos or 'factura' not in datos['data']:
             return response_error("El nodo 'data.factura' es obligatorio", http_status=409)
 
         data = datos['data']
 
-        campos_adicionales = ['nombre_solicitante', 'cargo', 'email']
+        # Validar los campos adicionales dentro de "data"
+        campos_adicionales = ['nombre_solicitante', 'cargo', 'correo_electronico']
         for campo in campos_adicionales:
             if campo not in data:
                 return response_error(f"El campo {campo} en 'data' es obligatorio", http_status=409)
 
+        # Validar los campos requeridos dentro de "factura"
         facturas_data = data['factura']
         campos_factura = [
-            'nombre_proveedor', 'no_factura', 'fecha_otorga', 'fecha_vence',
-            'monto', 'iva', 'descuento_app', 'subtotal', 'total'
+            'cliente', 'no_factura', 'fecha_otorgamiento', 'fecha_vencimiento',
+            'monto_factura', 'iva', 'pronto_pago', 'subtotal_descuento', 'total_a_recibir'
         ]
         for campo in campos_factura:
             if campo not in facturas_data:
@@ -100,7 +100,7 @@ def solicitar_pago_factura():
 
         # Validar formato de fecha
         try:
-            fecha_vencimiento = datetime.strptime(facturas_data['fecha_vence'], "%d/%m/%Y")
+            fecha_vencimiento = datetime.strptime(facturas_data['fecha_vencimiento'], "%d/%m/%Y")
         except ValueError:
             return response_error("Formato de fecha inválido. Use DD/MM/YYYY", http_status=409)
 
@@ -114,76 +114,44 @@ def solicitar_pago_factura():
 
         # Crear la nueva solicitud
         nueva_solicitud = Solicitud(
-            nombre_cliente=data['nombre_solicitante'],  
-            contacto=factura_existente.proveedor.telefono,  
-            email=data['email'],
+            nombre_cliente=facturas_data['cliente'],
+            contacto=data['nombre_solicitante'],  
+            email=data['correo_electronico'],
             cargo=data['cargo'],
-            descuento_app=facturas_data['descuento_app'],
+            descuento_app=facturas_data['pronto_pago'],
             iva=facturas_data['iva'],
-            subtotal=facturas_data['subtotal'],
-            total=facturas_data['total'],
+            subtotal=facturas_data['subtotal_descuento'],
+            total=facturas_data['total_a_recibir'],
             fecha_solicitud=fecha_actual,
             id_factura=factura_existente.id,
-            id_estado=1  
+            id_estado=1 # Estado de la solicitud: Pendiente
         )
 
         db.session.add(nueva_solicitud)
         db.session.commit()
 
-        # Obtener los parámetros adicionales de la base de datos
-        parametros = Parametro.query.filter(Parametro.clave.in_(['NOM-EMPRESA', 'ENC-EMPRESA', 'TEL-EMPRESA','MAIL-EMPRESA'])).all()
-        parametros_dict = {param.clave: param.valor for param in parametros}
-
-        nombre_empresa = parametros_dict.get('NOM-EMPRESA', 'Nombre Empresa No Definido')
-        nombre_encargado = parametros_dict.get('ENC-EMPRESA', 'Encargado No Definido')
-        telefono_empresa = parametros_dict.get('TEL-EMPRESA', 'Teléfono No Definido')
-        email_empresa = parametros_dict.get('MAIL-EMPRESA', 'Email No Definido')
-
-        # Datos para el correo de confirmación al proveedor
-        datos_confirmacion = {
-            "nombreSolicitante": data['nombre_solicitante'],
-            "noFactura": facturas_data['no_factura'],
-            "monto": f"${facturas_data['monto']}",
-            "fechaSolicitud": fecha_actual.strftime("%d/%m/%Y"),
-            "nombreEmpresa": nombre_empresa,
-            "nombreEncargadoEmpresa": nombre_encargado,
-            "telefonoEmpresa": telefono_empresa,
+        # Preparar la respuesta
+        resultado = {
+            "factura": {
+                "cliente": facturas_data["cliente"],
+                "no_factura": facturas_data["no_factura"],
+                "dias_restantes": dias,
+                "fecha_otorgamiento": facturas_data["fecha_otorgamiento"],
+                "fecha_vencimiento": facturas_data["fecha_vencimiento"],
+                "monto_factura": facturas_data["monto_factura"],
+                "iva": facturas_data["iva"],
+                "pronto_pago": facturas_data["pronto_pago"],
+                "subtotal_descuento": facturas_data["subtotal_descuento"],
+                "total_a_recibir": facturas_data["total_a_recibir"]
+            },
+            "nombre_solicitante": data["nombre_solicitante"],
+            "correo_electronico": data["correo_electronico"],
+            "cargo": data["cargo"]
         }
-        asunto_confirmacion = f"Confirmación de Recepción de su Solicitud de Pronto Pago FACTURA {datos_confirmacion['noFactura']}"
-        contenido_html_confirmacion = generar_plantilla('correo_confirmacion_solicitud_pp.html', datos_confirmacion)
 
-        # Enviar correo de confirmación al proveedor
-        enviar_correo(data['email'], asunto_confirmacion, contenido_html_confirmacion)
-
-       # Obtener los usuarios con rol "Contador"
-        usuarios_contadores = Usuario.query.join(Rol).filter(Rol.rol == "Contador").all()
-
-        # Verificar si hay usuarios con el rol
-        if not usuarios_contadores:
-            return response_error("No se encontraron usuarios con el rol de Contador para enviar la notificación.", http_status=404)
-
-        # Enviar notificación a cada contador
-        for contador in usuarios_contadores:
-            datos_notificacion = {
-                "nombreContador": contador.nombre_completo,
-                "proveedor": facturas_data['nombre_proveedor'],
-                "noFactura": facturas_data['no_factura'],
-                "montoFactura": f"${float(facturas_data['monto']):.2f}",
-                "fechaSolicitud": fecha_actual.strftime("%d/%m/%Y"),
-                "diasCredito": dias,
-                "nombreEmpresa": nombre_empresa
-            }
-            asunto_notificacion = f"Nueva Solicitud de Pronto Pago en Espera de Gestión FACTURA {datos_notificacion['noFactura']}"
-            contenido_html_notificacion = generar_plantilla('correo_notificacion_solicitud_pendiente_aprobacion_pp.html', datos_notificacion)
-            
-            # Enviar correo a cada contador
-            enviar_correo(contador.email, asunto_notificacion, contenido_html_notificacion)
-            print(f"Enviado correo notificacion a {contador.email}")
-
-        return response_success("Solicitud creada exitosamente. Los correos de confirmación y notificación han sido enviados.", http_status=201)
+        return response_success(None, "Solicitud creada exitosamente", http_status=201)
     except Exception as e:
         return response_error(str(e), http_status=500)
-
 
 
 

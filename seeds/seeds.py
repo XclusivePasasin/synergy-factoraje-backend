@@ -5,8 +5,6 @@ from models.parametros import Parametro
 from models.estados import Estado
 from models.proveedores_calificados import ProveedorCalificado
 from models.facturas import Factura
-from models.menus import Menu
-from models.permisos import Permiso
 from models.roles import Rol
 
 # Crear un grupo de comandos para seeds
@@ -18,10 +16,6 @@ def seed_parametros():
     with current_app.app_context():
         parametros = [
             {"clave": "INT_AN_PP", "valor": "18"},
-            {"clave": "NOM-EMPRESA", "valor": "Synergy Financial Corp"},
-            {"clave": "ENC-EMPRESA", "valor": "Vanessa Chicas"},
-            {"clave": "TEL-EMPRESA", "valor": "7777-5578"},
-            {"clave": "MAIL-EMPRESA", "valor": "eliazar.rebollo23@gmail.com"}
         ]
 
         for param_data in parametros:
@@ -32,7 +26,6 @@ def seed_parametros():
         db.session.commit()
         print("Seeds para 'parametros' creados exitosamente.")
 
-
 @seed_cli.command('estados')
 def seed_estados():
     """Seed de estados"""
@@ -41,6 +34,11 @@ def seed_estados():
             {
                 "clave": "PENDIENTE",
                 "descripcion": "Estado de la factura cuando se ha enviado por correo al proveedor clasificado para pronto pago",
+                "clasificacion": "Solicitud"
+            },
+            {
+                "clave": "SOLICITADA",
+                "descripcion": "Estado de una solicitud cuando el proveedor decide factoraje",
                 "clasificacion": "Solicitud"
             },
             {
@@ -54,14 +52,9 @@ def seed_estados():
                 "clasificacion": "Solicitud"
             },
             {
-                "clave": "PENDIENTE",
-                "descripcion": "Estado que indica que el desembolso esta pendiente de procesar por el agente de Synergy",
-                "clasificacion": "Desembolso"
-            },
-            {
                 "clave": "DESEMBOLSADA",
-                "descripcion": "Estado que indica que el desembolso se ha procesado en una transacción bancaria",
-                "clasificacion": "Desembolso"
+                "descripcion": "Estado que indica que el desembolso se ha hecho correctamente al proveedor que aplicó a pronto pago",
+                "clasificacion": "Solicitud"
             }
         ]
 
@@ -82,22 +75,7 @@ def seed_roles():
                 "rol": "Administrador",
                 "nombre": "Administrador",
                 "descripcion": None
-            },
-            {
-                "rol": "Contador",
-                "nombre": "Agente Synergy",
-                "descripcion": None
-            },
-            {
-                "rol": "Auditor",
-                "nombre": "Auditor Synergy",
-                "descripcion": None
-            },
-            {
-                "rol": "Solicitador",
-                "nombre": "Solicitante de pronto pago",
-                "descripcion": None
-            },
+            }
         ]
 
         for rol_data in roles:
@@ -324,268 +302,18 @@ def seed_facturas():
                 db.session.add(factura)
         db.session.commit()
         print("Seeds para 'facturas' creados exitosamente.")
-        
-        
-from models.usuarios import Usuario
-from utils.db import db
 
-@seed_cli.command('menus')
-def seed_menus():
-    """Seed de menus"""
-    with current_app.app_context():
-        menus = [
-            {
-                "id": 1,
-                "menu": "Panel",
-                "description": "Este menu muestra la informacion como acceso directo",
-                "path": "/home",
-                "icon": "pi pi-chart-line",
-                "padre": 0,
-                "orden": 1,
-            },
-            {
-                "id": 2,
-                "menu": "Solicitudes",
-                "description": "Este menu muestra las solicitudes que estan pendientes",
-                "path": "/solicitudes",
-                "icon": "pi pi-chart-bar",
-                "padre": 0,
-                "orden": 2,
-            },
-            {
-                "id": 3,
-                "menu": "Aprobadas",
-                "description": None,
-                "path": "/solicitudes/aprobadas",
-                "icon": "pi pi-check-circle",
-                "padre": 2,
-                "orden": 2,
-            },
-            {
-                "id": 4,
-                "menu": "Sin Aprobar",
-                "description": None,
-                "path": "/solicitudes/sin-aprobar",
-                "icon": "pi pi-hourglass",
-                "padre": 2,
-                "orden": 2,
-            },
-            {
-                "id": 5,
-                "menu": "Desembolso",
-                "description": None,
-                "path": "/desembolsos",
-                "icon": "pi pi-shopping-bag",
-                "padre": 0,
-                "orden": 3,
-            },
-            {
-                "id": 6,
-                "menu": "Procesadas",
-                "description": None,
-                "path": "/desembolsos/procesadas",
-                "icon": "pi-chart-bar",
-                "padre": 3,
-                "orden": 3,
-            },
-            {
-                "id": 7,
-                "menu": "Ajustes",
-                "description": None,
-                "path": "/ajustes",
-                "icon": "pi pi-sliders-h",
-                "padre": 0,
-                "orden": 4,
-            },
-            {
-                "id": 8,
-                "menu": "Usuarios",
-                "description": None,
-                "path": "/usuarios",
-                "icon": "pi pi-users",
-                "padre": 0,
-                "orden": 5,
-            },
-            {
-                "id": 9,
-                "menu": "Reportes",
-                "description": None,
-                "path": "/reportes",
-                "icon": "pi pi-warehouse",
-                "padre": 0,
-                "orden": 6,
-            },
-            {
-                "id": 10,
-                "menu": "Bitacoras",
-                "description": None,
-                "path": "/reportes/bitacoras",
-                "icon": "pi-chart-bar",
-                "padre": 6,
-                "orden": 6.1,
-            },
-            {
-                "id": 11,
-                "menu": "Solicitar Pronto Pago",
-                "description": None,
-                "path": "/solicitar-pronto-pago",
-                "icon": "pi-chart-bar",
-                "padre": 0,
-                "orden": 7,
-            },
-        ]
-
-        for menu in menus:
-            new_menu = Menu(
-                id=menu["id"],
-                menu=menu["menu"],
-                description=menu["description"],
-                path=menu["path"],
-                icon=menu["icon"],
-                orden=menu["orden"],
-                padre=menu["padre"],
-            )
-            db.session.add(new_menu)
-        
-        db.session.commit()
-        print("Menús insertados exitosamente.")
-        
-@seed_cli.command('permisos')
-def seed_permisos():
-    """Seed de permisos"""
-    with current_app.app_context():
-        permisos = [
-            {"id": 1, "id_rol": 1, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 2, "id_rol": 1, "id_menu": 2, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 3, "id_rol": 1, "id_menu": 3, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 4, "id_rol": 1, "id_menu": 4, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 5, "id_rol": 1, "id_menu": 5, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 6, "id_rol": 1, "id_menu": 6, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 7, "id_rol": 1, "id_menu": 7, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 8, "id_rol": 1, "id_menu": 8, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 9, "id_rol": 2, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 10, "id_rol": 2, "id_menu": 2, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 11, "id_rol": 2, "id_menu": 3, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 12, "id_rol": 2, "id_menu": 4, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 13, "id_rol": 2, "id_menu": 5, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 14, "id_rol": 2, "id_menu": 6, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 15, "id_rol": 1, "id_menu": 9, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 16, "id_rol": 1, "id_menu": 10, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 17, "id_rol": 3, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 18, "id_rol": 3, "id_menu": 9, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 19, "id_rol": 3, "id_menu": 10, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 20, "id_rol": 4, "id_menu": 11, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-        ]
-
-        for permiso in permisos:
-            new_permiso = Permiso(
-                id=permiso["id"],
-                id_rol=permiso["id_rol"],
-                id_menu=permiso["id_menu"],
-                create_perm=permiso["create_perm"],
-                edit_perm=permiso["edit_perm"],
-                delete_perm=permiso["delete_perm"],
-                view_perm=permiso["view_perm"]
-            )
-            db.session.add(new_permiso)
-
-        db.session.commit()
-        print("Permisos insertados exitosamente.")
-
-
-@seed_cli.command('usuarios')
-def seed_usuarios():
-    """Seed de usuarios"""
-    with current_app.app_context():
-        usuarios = [
-            {
-                "id": 1,
-                "nombre_completo": "Administrador",
-                "email": "clobitechadmin@clobitech.com",
-                "password": None,
-                "temp_password": "9c067f586228cecb9c8bc50de2b33eeb7a2c2c73d406441a87977109b631207d",
-                "cargo": "Administrador",
-                "token": "",
-                "token_date_end": None,
-                "id_rol": 1,
-                "created_at": "2024-12-02 08:27:55",
-                "updated_at": "2024-12-02 08:29:08"
-            },
-            {
-                "id": 2,
-                "nombre_completo": "Sonia Navarro",
-                "email": "sonia.navarro@clobitech.com",
-                "password": None,
-                "temp_password": "9c067f586228cecb9c8bc50de2b33eeb7a2c2c73d406441a87977109b631207d",
-                "cargo": "Agente Synergy",
-                "token": "",
-                "token_date_end": None,
-                "id_rol": 2,
-                "created_at": "2024-12-02 11:22:00",
-                "updated_at": "2024-12-02 11:30:27"
-            },
-            {
-                "id": 3,
-                "nombre_completo": "Antonio Pasasin",
-                "email": "eliazar.rebollo23@gmail.com",
-                "password": None,
-                "temp_password": "9c067f586228cecb9c8bc50de2b33eeb7a2c2c73d406441a87977109b631207d",
-                "cargo": "Auditor",
-                "token": "",
-                "token_date_end": None,
-                "id_rol": 3,
-                "created_at": "2024-12-02 11:28:45",
-                "updated_at": "2024-12-02 11:32:10"
-            },
-            {
-                "id": 4,
-                "nombre_completo": "Alex Chinque",
-                "email": "alexchinke97@gmail.com",
-                "password": None,
-                "temp_password": "9c067f586228cecb9c8bc50de2b33eeb7a2c2c73d406441a87977109b631207d",
-                "cargo": "Proveedor",
-                "token": "",
-                "token_date_end": None,
-                "id_rol": 4,
-                "created_at": "2024-12-02 11:28:45",
-                "updated_at": "2024-12-02 11:32:10"
-            },
-        ]
-
-        for usuario in usuarios:
-            new_usuario = Usuario(
-                id=usuario["id"],
-                nombre_completo=usuario["nombre_completo"],
-                email=usuario["email"],
-                password=usuario["password"],
-                temp_password=usuario["temp_password"],
-                cargo=usuario["cargo"],
-                token=usuario["token"],
-                token_date_end=usuario["token_date_end"],
-                id_rol=usuario["id_rol"],
-                created_at=usuario["created_at"],
-                updated_at=usuario["updated_at"]
-            )
-            db.session.add(new_usuario)
-
-        db.session.commit()
-        print("Usuarios insertados exitosamente.")
-
-
-@seed_cli.command("all")
+@seed_cli.command('all')
 def seed_all():
-    """Ejecuta todos los comandos de seeds en el orden correcto"""
+    """Ejecuta todos los comandos de seeds"""
     print("Iniciando el seed de todas las tablas...")
     with current_app.app_context():
         try:
             seed_parametros()
             seed_estados()
             seed_roles()
-            seed_menus()
             seed_proveedores()
             seed_facturas()
-            seed_usuarios()
-            seed_permisos()
             print("Seeds ejecutados correctamente en todas las tablas.")
         except Exception as e:
             print(f"Error al ejecutar seeds: {e}")
