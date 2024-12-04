@@ -25,7 +25,7 @@ def obtener_solicitudes():
         nombre_proveedor = request.args.get('nombre_proveedor')
         nrc = request.args.get('nrc')
         telefono = request.args.get('telefono')
-        correo = request.args.get('correo')
+        email = request.args.get('email')
         no_factura = request.args.get('no_factura')
 
         # Construir el query base
@@ -43,8 +43,8 @@ def obtener_solicitudes():
             query = query.filter(ProveedorCalificado.nrc.ilike(f"%{nrc}%"))
         if telefono:
             query = query.filter(ProveedorCalificado.telefono.ilike(f"%{telefono}%"))
-        if correo:
-            query = query.filter(ProveedorCalificado.correo_electronico.ilike(f"%{correo}%"))
+        if email:
+            query = query.filter(ProveedorCalificado.correo_electronico.ilike(f"%{email}%"))
         if no_factura:  
             query = query.filter(Factura.no_factura.ilike(f"%{no_factura}%"))
 
@@ -61,7 +61,6 @@ def obtener_solicitudes():
                 {
                     "id": solicitud.id,
                     "nombre_cliente": solicitud.nombre_cliente,
-                    "contacto": solicitud.contacto,
                     "email": solicitud.email,
                     "iva": float(solicitud.iva),
                     "subtotal": float(solicitud.subtotal),
@@ -110,7 +109,6 @@ def obtener_detalle_solicitud():
             "solicitud": {
                 "id": solicitud.id,
                 "nombre_cliente": solicitud.nombre_cliente,
-                "contacto": solicitud.contacto,
                 "email": solicitud.email,
                 "iva": float(solicitud.iva),
                 "subtotal": float(solicitud.subtotal),
@@ -120,9 +118,9 @@ def obtener_detalle_solicitud():
                 "factura": {
                     "id": solicitud.factura.id,
                     "no_factura": solicitud.factura.no_factura,
-                    "fecha_otorgamiento": solicitud.factura.fecha_otorga.strftime("%d/%m/%Y"),
-                    "fecha_vencimiento": solicitud.factura.fecha_vence.strftime("%d/%m/%Y"),
-                    "monto_factura": float(solicitud.factura.monto),
+                    "fecha_otorga": solicitud.factura.fecha_otorga.strftime("%d/%m/%Y"),
+                    "fecha_vence": solicitud.factura.fecha_vence.strftime("%d/%m/%Y"),
+                    "monto": float(solicitud.factura.monto),
                     "pronto_pago": float(solicitud.subtotal) - float(solicitud.iva),
                     "proveedor": {
                         "id": solicitud.factura.proveedor.id,
@@ -142,12 +140,10 @@ def obtener_detalle_solicitud():
 @token_required
 def aprobar_solicitud():
     try:
-        # Obtener el ID de la solicitud desde los query parameters
         solicitud_id = request.args.get('id', type=int)
         if not solicitud_id:
             return response_error("El parámetro 'id' es obligatorio", http_status=400)
 
-        # Obtener datos del body
         data = request.get_json()
         id_aprobador = data.get('id_aprobador')  
         comentario = data.get('comentario', None)
