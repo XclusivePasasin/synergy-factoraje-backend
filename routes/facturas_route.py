@@ -4,6 +4,8 @@ from datetime import datetime
 from models.parametros import Parametro
 from models.solicitudes import Solicitud
 from models.facturas import Factura
+from models.usuarios import Usuario
+from models.roles import Rol
 from utils.db import db
 from utils.response import response_success, response_error
 from utils.interceptor import token_required
@@ -18,7 +20,7 @@ def obtener_detalle_factura():
         # Obtener el parámetro no_factura desde la URL
         no_factura = request.args.get('no_factura')
         if not no_factura:
-            return response_error("El parámetro no_factura es obligatorio", http_status=422)
+            return response_error("El parámetro no_factura es obligatorio", http_status=409)
 
         # Consulta para obtener los detalles de la factura
         factura = Factura.query.filter_by(no_factura=no_factura).first()
@@ -29,7 +31,7 @@ def obtener_detalle_factura():
         fecha_actual = datetime.now()
         dias_restantes = (factura.fecha_vence - fecha_actual).days
         if dias_restantes < 0:
-            return response_error("La fecha de vencimiento ya pasó", http_status=422)
+            return response_error("La fecha de vencimiento ya pasó", http_status=409)
 
         # Obtener el parámetro de interés anual
         parametro = Parametro.query.filter_by(clave='INT_AN_PP').first()
@@ -47,13 +49,13 @@ def obtener_detalle_factura():
         # Preparar los detalles de la factura dentro del nodo "facturas"
         resultado_final = {
             "factura": {
-                "cliente": factura.nombre_proveedor,
+                "nombre_proveedor": factura.nombre_proveedor,
                 "no_factura": factura.no_factura,
                 "dias_restantes": dias_restantes,
-                "fecha_otorgamiento": factura.fecha_otorga.strftime("%d/%m/%Y"),
-                "fecha_vencimiento": factura.fecha_vence.strftime("%d/%m/%Y"),
-                "monto_factura": float(factura.monto),
-                **resultado  # Incluye los cálculos realizados por metrica_factura
+                "fecha_otorga": factura.fecha_otorga.strftime("%d/%m/%Y"),
+                "fecha_vence": factura.fecha_vence.strftime("%d/%m/%Y"),
+                "monto": float(factura.monto),
+                **resultado 
             }
         }
 
@@ -67,32 +69,29 @@ def solicitar_pago_factura():
     try:
         datos = request.json
 
-        # Validar que el nodo "data" y "factura" existan en el JSON
         if 'data' not in datos or 'factura' not in datos['data']:
-            return response_error("El nodo 'data.factura' es obligatorio", http_status=422)
+            return response_error("El nodo 'data.factura' es obligatorio", http_status=409)
 
         data = datos['data']
 
-        # Validar los campos adicionales dentro de "data"
-        campos_adicionales = ['nombre_solicitante', 'cargo', 'correo_electronico']
+        campos_adicionales = ['nombre_solicitante', 'cargo', 'email']
         for campo in campos_adicionales:
             if campo not in data:
-                return response_error(f"El campo {campo} en 'data' es obligatorio", http_status=422)
+                return response_error(f"El campo {campo} en 'data' es obligatorio", http_status=409)
 
-        # Validar los campos requeridos dentro de "factura"
         facturas_data = data['factura']
         campos_factura = [
-            'cliente', 'no_factura', 'fecha_otorgamiento', 'fecha_vencimiento',
-            'monto_factura', 'iva', 'pronto_pago', 'subtotal_descuento', 'total_a_recibir'
+            'nombre_proveedor', 'no_factura', 'fecha_otorga', 'fecha_vence',
+            'monto', 'iva', 'descuento_app', 'subtotal', 'total'
         ]
         for campo in campos_factura:
             if campo not in facturas_data:
-                return response_error(f"El campo {campo} en 'factura' es obligatorio", http_status=422)
+                return response_error(f"El campo {campo} en 'factura' es obligatorio", http_status=409)
 
         # Validar que la factura exista por no_factura
         factura_existente = Factura.query.filter_by(no_factura=facturas_data['no_factura']).first()
         if not factura_existente:
-            return response_error("La solicitud proporcionada no existe en la base de datos", http_status=422)
+            return response_error("La solicitud proporcionada no existe en la base de datos", http_status=409)
 
         # Validar que la solicitud no exista ya para esa factura
         solicitud_existente = Solicitud.query.filter_by(id_factura=factura_existente.id).first()
@@ -101,28 +100,28 @@ def solicitar_pago_factura():
 
         # Validar formato de fecha
         try:
-            fecha_vencimiento = datetime.strptime(facturas_data['fecha_vencimiento'], "%d/%m/%Y")
+            fecha_vencimiento = datetime.strptime(facturas_data['fecha_vence'], "%d/%m/%Y")
         except ValueError:
-            return response_error("Formato de fecha inválido. Use DD/MM/YYYY", http_status=422)
+            return response_error("Formato de fecha inválido. Use DD/MM/YYYY", http_status=409)
 
         fecha_actual = datetime.now()
         if fecha_actual > fecha_vencimiento:
-            return response_error("El tiempo de otorgamiento ha expirado", http_status=422)
+            return response_error("El tiempo de otorgamiento ha expirado", http_status=409)
 
         dias = (fecha_vencimiento - fecha_actual).days
         if dias < 0:
-            return response_error("La fecha de vencimiento ya pasó", http_status=422)
+            return response_error("La fecha de vencimiento ha expirado", http_status=409)
 
         # Crear la nueva solicitud
         nueva_solicitud = Solicitud(
             nombre_cliente=data['nombre_solicitante'],  
             contacto=factura_existente.proveedor.telefono,  
-            email=data['correo_electronico'],
+            email=data['email'],
             cargo=data['cargo'],
-            descuento_app=facturas_data['pronto_pago'],
+            descuento_app=facturas_data['descuento_app'],
             iva=facturas_data['iva'],
-            subtotal=facturas_data['subtotal_descuento'],
-            total=facturas_data['total_a_recibir'],
+            subtotal=facturas_data['subtotal'],
+            total=facturas_data['total'],
             fecha_solicitud=fecha_actual,
             id_factura=factura_existente.id,
             id_estado=1  
@@ -144,7 +143,7 @@ def solicitar_pago_factura():
         datos_confirmacion = {
             "nombreSolicitante": data['nombre_solicitante'],
             "noFactura": facturas_data['no_factura'],
-            "monto": f"${facturas_data['monto_factura']}",
+            "monto": f"${facturas_data['monto']}",
             "fechaSolicitud": fecha_actual.strftime("%d/%m/%Y"),
             "nombreEmpresa": nombre_empresa,
             "nombreEncargadoEmpresa": nombre_encargado,
@@ -154,23 +153,32 @@ def solicitar_pago_factura():
         contenido_html_confirmacion = generar_plantilla('correo_confirmacion_solicitud_pp.html', datos_confirmacion)
 
         # Enviar correo de confirmación al proveedor
-        enviar_correo(data['correo_electronico'], asunto_confirmacion, contenido_html_confirmacion)
+        enviar_correo(data['email'], asunto_confirmacion, contenido_html_confirmacion)
 
-        # Datos para el correo de notificación a Synergy
-        datos_notificacion = {
-            "nombreEmpresa": nombre_empresa,
-            "proveedor": facturas_data['cliente'],
-            "noFactura": facturas_data['no_factura'],
-            "montoFactura": f"${facturas_data['monto_factura']}",
-            "fechaSolicitud": fecha_actual.strftime("%d/%m/%Y"),
-            "diasCredito": dias,
-            "nombreEmpresa": nombre_empresa
-        }
-        asunto_notificacion = f"Nueva Solicitud de Pronto Pago en Espera de Gestión FACTURA {datos_notificacion['noFactura']}"
-        contenido_html_notificacion = generar_plantilla('correo_notificacion_solicitud_pendiente_aprobacion_pp.html', datos_notificacion)
+       # Obtener los usuarios con rol "Contador"
+        usuarios_contadores = Usuario.query.join(Rol).filter(Rol.rol == "Contador").all()
 
-        # Enviar correo de notificación a Synergy
-        enviar_correo(email_empresa, asunto_notificacion, contenido_html_notificacion)
+        # Verificar si hay usuarios con el rol
+        if not usuarios_contadores:
+            return response_error("No se encontraron usuarios con el rol de Contador para enviar la notificación.", http_status=404)
+
+        # Enviar notificación a cada contador
+        for contador in usuarios_contadores:
+            datos_notificacion = {
+                "nombreContador": contador.nombre_completo,
+                "proveedor": facturas_data['nombre_proveedor'],
+                "noFactura": facturas_data['no_factura'],
+                "montoFactura": f"${float(facturas_data['monto']):.2f}",
+                "fechaSolicitud": fecha_actual.strftime("%d/%m/%Y"),
+                "diasCredito": dias,
+                "nombreEmpresa": nombre_empresa
+            }
+            asunto_notificacion = f"Nueva Solicitud de Pronto Pago en Espera de Gestión FACTURA {datos_notificacion['noFactura']}"
+            contenido_html_notificacion = generar_plantilla('correo_notificacion_solicitud_pendiente_aprobacion_pp.html', datos_notificacion)
+            
+            # Enviar correo a cada contador
+            enviar_correo(contador.email, asunto_notificacion, contenido_html_notificacion)
+            print(f"Enviado correo notificacion a {contador.email}")
 
         return response_success("Solicitud creada exitosamente. Los correos de confirmación y notificación han sido enviados.", http_status=201)
     except Exception as e:
