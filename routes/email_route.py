@@ -1,8 +1,6 @@
 from flask import Blueprint, jsonify, request
 from services.email_service import generar_plantilla, enviar_correo
 from utils.interceptor import token_required
-from utils.response import response_success, response_error
-from models.parametros import Parametro
 
 email_bp = Blueprint('email', __name__)
 
@@ -12,61 +10,25 @@ def enviar_email():
     try:
         # Obtenemos JSON de la petición
         datos = request.json
-
         # Validamos que los campos requeridos estén presentes
         campos_principales = ['destinatario', 'asunto', 'datos']
         for campo in campos_principales:
             if campo not in datos:
-                return response_error(f"El campo {campo} es obligatorio", http_status=400)
-            
-        # Obtener los parámetros adicionales de la base de datos
-        parametros = Parametro.query.filter(Parametro.clave.in_(['NOM-EMPRESA', 'ENC-EMPRESA', 'TEL-EMPRESA'])).all()
-        parametros_dict = {param.clave: param.valor for param in parametros}
-
-        nombre_empresa = parametros_dict.get('NOM-EMPRESA', 'Nombre Empresa No Definido')
-        nombre_encargado = parametros_dict.get('ENC-EMPRESA', 'Encargado No Definido')
-        telefono_empresa = parametros_dict.get('TEL-EMPRESA', 'Teléfono No Definido')
-
+                return jsonify({"error": f"El campo {campo} es obligatorio"}), 400
         # Validamos que los campos requeridos dentro de 'datos' estén presentes
         datos_plantilla = datos['datos']
-        campos_datos = [
-            'nombreEmpresa', 'noFactura', 'monto', 
-            'fechaOtorgamiento', 'fechaVencimiento', 
-            'diasCredito'
-        ]  
-        
+        campos_datos = ['nombreEmpresa', 'noFactura', 'monto', 'fechaOtorgamiento', 'fechaVencimiento', 'diasCredito', 'linkBoton']
         for campo in campos_datos:
             if campo not in datos_plantilla:
-                return response_error(f"El campo {campo} es obligatorio dentro de 'datos'", http_status=400)
-
-         # Agregar variables adicionales a datos_plantilla
-        datos_plantilla.update({
-            'nombreEmpresaEncargada': nombre_empresa,
-            'nombreEncargadoEmpresa': nombre_encargado,
-            'telefonoEmpresa': telefono_empresa
-        })
-
-        # Generar dinámicamente el link del botón
-        no_factura = datos_plantilla['noFactura']
-        datos_plantilla['linkBoton'] = f"http://localhost:4200/solicitar-pronto-pago?no_factura={no_factura}"
-
-        # Generamos el contenido HTML usando la plantilla
-        contenido_html = generar_plantilla('correo_template.html', datos_plantilla)
-
-        if not contenido_html:
-            return response_error("Error al generar el contenido del correo", http_status=500)
-
-        # Enviamos el correo
-        resultado = enviar_correo(
-            destinatario=datos['destinatario'], 
-            asunto=datos['asunto'], 
-            contenido_html=contenido_html
-        )
+                return jsonify({"error": f"El campo {campo} es obligatorio dentro de 'datos'"}), 400
+        # Generamos el contenido HTML
+        contenido_html = generar_plantilla(datos_plantilla)
+        resultado = enviar_correo(datos['destinatario'], datos['asunto'], contenido_html)
 
         if resultado:
-            return response_success(data=None, message="Correo enviado exitosamente", http_status=200)
+            return jsonify({"mensaje": "Correo enviado exitosamente"}), 200
         else:
-            return response_error("No se pudo enviar el correo", http_status=500)
-
+            return jsonify({"error": "No se pudo enviar el correo"}), 500
     except Exception as e:
-        return response_error("Ocurrió un error interno", http_status=500)
+        return jsonify({"error": str(e)}), 500
+
