@@ -7,7 +7,7 @@ class Menu(db.Model):
     description = db.Column(db.Text)
     path = db.Column(db.String(255))
     icon = db.Column(db.String(50))
-    orden = db.Column(db.Integer)
+    orden = db.Column(db.Float)
     padre = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())

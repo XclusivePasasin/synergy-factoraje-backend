@@ -4,10 +4,14 @@ import re
 from flask import current_app
 import jwt
 from models.usuarios import Usuario
+from models.permisos import Permiso
+from models.menus import Menu
 from models.roles import Rol
+from models.parametros import Parametro
 from utils.db import db
 from utils.response import response_success, response_error
 from utils.destructor import blacklist_token
+from services.email_service import *
 
 class UsuarioService:
     @staticmethod
@@ -39,18 +43,17 @@ class UsuarioService:
                 return response_error("El correo ya está registrado", http_status=409)
 
             # Generar contraseña temporal
-            temp_password = UsuarioService.generar_contraseña_temp()
+            temp_password = '12345678'  
             print('temp_password: ', temp_password)
 
-            # Hashear la contraseña y la contraseña temporal usando hashlib con SHA-256
+            # Hashear la contraseña temporal usando hashlib con SHA-256
             salt = current_app.config['SALT_SECRET'] 
-            hashed_password = hashlib.sha256((temp_password + salt).encode('utf-8')).hexdigest()
             hashed_temp_password = hashlib.sha256((temp_password + salt).encode('utf-8')).hexdigest()
+
             # Crear el nuevo usuario
             nuevo_usuario = Usuario(
                 nombre_completo=nombre_completo,
                 email=email,
-                password=hashed_password,
                 temp_password=hashed_temp_password,
                 cargo=cargo,
                 id_rol=id_rol
@@ -60,6 +63,26 @@ class UsuarioService:
             db.session.add(nuevo_usuario)
             db.session.commit()
 
+            # Obtener el valor de la clave NOM-EMPRESA
+            parametro_nombre_empresa = Parametro.query.filter_by(clave='NOM-EMPRESA').first()
+            if not parametro_nombre_empresa:
+                return response_error("No se encontró el parámetro NOM-EMPRESA", http_status=500)
+
+            nombre_empresa = parametro_nombre_empresa.valor
+
+            # Enviar correo con las credenciales al usuario
+            datos_credenciales = {
+                "nombreUsuario": nombre_completo,
+                "correoElectronico": email,
+                "contrasenaTemporal": temp_password,
+                "nombreEmpresa": nombre_empresa,  # Incluir el nombre de la empresa
+            }
+            asunto = f"Credenciales de acceso al sistema de pronto pago"
+            contenido_html_credenciales = generar_plantilla('correo_contraseña_temporal.html', datos_credenciales)
+
+            # Enviar el correo
+            enviar_correo(email, asunto, contenido_html_credenciales)
+
             # Retornar detalles del usuario creado (sin incluir contraseñas)
             respuesta = {
                 "usuario_id": nuevo_usuario.id,
@@ -68,16 +91,16 @@ class UsuarioService:
                 "cargo": nuevo_usuario.cargo,
                 "id_rol": nuevo_usuario.id_rol
             }
-            return response_success(respuesta, "Usuario creado exitosamente", http_status=201)
+            return response_success(respuesta, "Usuario creado exitosamente. Las credenciales han sido enviadas al correo registrado.", http_status=201)
         except Exception as e:
-            # Revertir cambios en caso de error
             db.session.rollback()
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
         
     @staticmethod
     def inicio_sesion(data):
         """
-        Autentica un usuario utilizando el email y genera un token JWT si las credenciales son válidas.
+        Autentica un usuario utilizando el email y la contraseña, y genera un JWT definitivo.
         """
         try:
             # Validar los campos requeridos
@@ -91,10 +114,6 @@ class UsuarioService:
             if len(email) < 10 or len(email) > 100 or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
                 return response_error("El formato o longitud del correo electrónico no es válido", http_status=400)
 
-            # Validar longitud de la contraseña
-            if len(password) < 6 or len(password) > 20:
-                return response_error("La longitud de la contraseña debe estar entre 6 y 20 caracteres", http_status=400)
-
             # Buscar al usuario en la base de datos por email
             usuario_encontrado = Usuario.query.filter_by(email=email).first()
             if not usuario_encontrado:
@@ -104,27 +123,72 @@ class UsuarioService:
             salt = current_app.config.get('SALT_SECRET')
             hashed_password = hashlib.sha256((password + salt).encode('utf-8')).hexdigest()
 
-            # Validar la contraseña
-            if hashed_password != usuario_encontrado.password:
-                return response_error("La contraseña es incorrecta", http_status=401)
+            # Verificar si el usuario tiene una contraseña o solo la contraseña temporal
+            if usuario_encontrado.password:
+                # Si el usuario tiene una contraseña (es decir, ya la ha cambiado anteriormente)
+                if hashed_password != usuario_encontrado.password:
+                    return response_error("La contraseña es incorrecta", http_status=401)
+                change_password = 0
+            else:
+                # Si el campo 'password' está vacío, se verifica contra la 'temp_password'
+                hashed_temp_password = hashlib.sha256((password + salt).encode('utf-8')).hexdigest()
+                if hashed_temp_password != usuario_encontrado.temp_password:
+                    return response_error("La contraseña es incorrecta", http_status=401)
+                change_password = 1 
 
-            # Generar el token
-            token_data = UsuarioService.crear_token(email)  # Usar email
+            # Consultar el rol del usuario y los permisos asociados
+            rol = Rol.query.get(usuario_encontrado.id_rol)
+            permisos = Permiso.query.filter_by(id_rol=usuario_encontrado.id_rol).all()
 
-            if not token_data:
+            # Construir la estructura de permisos y menús
+            permisos_data = []
+            for permiso in permisos:
+                menu = Menu.query.get(permiso.id_menu)
+                permisos_data.append({
+                    "create_perm": 1 if permiso.create_perm else 0, 
+                    "edit_perm": 1 if permiso.edit_perm else 0,     
+                    "delete_perm": 1 if permiso.delete_perm else 0,  
+                    "view_perm": 1 if permiso.view_perm else 0,     
+                    "menu": {
+                        "id": menu.id,
+                        "menu": menu.menu,
+                        "path": menu.path,
+                        "icon": menu.icon,
+                        "orden": menu.orden,
+                        "padre": menu.padre
+                    }
+                })
+
+            # Crear el token JWT
+            expires_in = 86400  # 24 horas
+            access_token = UsuarioService.crear_token(email)
+            token = access_token["token"]
+
+            if not access_token:
                 return response_error("Error al generar el token", http_status=500)
 
-            # Responder con los datos del usuario y el token
-            respuesta = {
-                "usuario_id": token_data["usuario_id"],
-                "nombre_completo": token_data["nombre_completo"],
-                "email": token_data["email"],
-                "token": token_data["token"]
+            # Construir la respuesta con los datos del usuario y el token
+            usuario_data = {
+                "id": usuario_encontrado.id,
+                "name": usuario_encontrado.nombre_completo,
+                "email": usuario_encontrado.email,
+                "role": rol.rol if rol else "Sin rol asignado",
+                "permissions": permisos_data, 
             }
-            return response_success(respuesta, "Inicio de sesión exitoso", http_status=200)
+
+            # Responder con la estructura correcta
+            respuesta = {
+                "usuario": usuario_data,
+                "access_token": token,  
+                "expires_in": expires_in,
+                "change_password": change_password 
+            }
+
+            return response_success(respuesta, "Autenticación completada", http_status=200)
         except Exception as e:
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
-    
+
+
     @staticmethod
     def generar_contraseña_temp(length=10):
         import string
@@ -191,22 +255,58 @@ class UsuarioService:
             if not usuario_encontrado:
                 return response_error("El usuario no existe", http_status=404)
 
-            # Generar un nuevo token
-            token_data = UsuarioService.crear_token(email)
+            # Generar un nuevo token JWT
+            expires_in = 86400  # 24 horas
+            access_token = UsuarioService.crear_token(email)
+            token = access_token["token"]
 
-            if not token_data:
+            if not access_token:
                 return response_error("Error al generar el token", http_status=500)
 
-            # Retornar los datos del usuario y el nuevo token
-            respuesta = {
-                "usuario_id": token_data["usuario_id"],
-                "nombre_completo": token_data["nombre_completo"],
-                "email": token_data["email"],
-                "token": token_data["token"]
+            # Consultar el rol del usuario y los permisos asociados
+            rol = Rol.query.get(usuario_encontrado.id_rol)
+            permisos = Permiso.query.filter_by(id_rol=usuario_encontrado.id_rol).all()
+
+            # Construir la estructura de permisos y menús
+            permisos_data = []
+            for permiso in permisos:
+                menu = Menu.query.get(permiso.id_menu)
+                permisos_data.append({
+                    "create_perm": 1 if permiso.create_perm else 0, 
+                    "edit_perm": 1 if permiso.edit_perm else 0,     
+                    "delete_perm": 1 if permiso.delete_perm else 0,  
+                    "view_perm": 1 if permiso.view_perm else 0,      
+                    "menu": {
+                        "id": menu.id,
+                        "menu": menu.menu,
+                        "path": menu.path,
+                        "icon": menu.icon,
+                        "orden": menu.orden,
+                        "padre": menu.padre
+                    }
+                })
+
+            # Construir los datos del usuario
+            usuario_data = {
+                "id": usuario_encontrado.id,
+                "name": usuario_encontrado.nombre_completo,
+                "email": usuario_encontrado.email,
+                "role": rol.rol if rol else "Sin rol asignado",
+                "permissions": permisos_data
             }
+
+            # Construir la respuesta con los mismos campos que inicio_sesion
+            respuesta = {
+                "usuario": usuario_data,
+                "access_token": token,  
+                "expires_in": expires_in
+            }
+
             return response_success(respuesta, "Token generado exitosamente", http_status=200)
         except Exception as e:
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
+
 
         
     @staticmethod
@@ -257,4 +357,40 @@ class UsuarioService:
         except Exception as e:
             db.session.rollback()
             return response_error(f"Error al destruir el token: {str(e)}", http_status=500)
+        
+    @staticmethod
+    def actualizar_contraseña(email, nueva_contraseña):
+        """
+        Actualiza la contraseña principal para el usuario especificado, solo si la contraseña temporal no es None.
+        Si la contraseña temporal es None, retorna un error indicando que no se puede actualizar la contraseña.
+        """
+        try:
+            # Buscar al usuario en la base de datos por email
+            usuario = Usuario.query.filter_by(email=email).first()
+            if not usuario:
+                return response_error("El usuario no existe", http_status=404)
+
+            # Verificar si la contraseña temporal está presente
+            if usuario.temp_password is None:
+                return response_error("Actualización de contraseña no permitida sin una contraseña temporal válida", http_status=403)
+
+            # Hashear la nueva contraseña
+            salt = current_app.config['SALT_SECRET']
+            hashed_password = hashlib.sha256((nueva_contraseña + salt).encode('utf-8')).hexdigest()
+
+            # Actualizar la contraseña del usuario en la base de datos y limpiar la contraseña temporal
+            usuario.password = hashed_password
+            usuario.temp_password = None  # Establecer la contraseña temporal a None
+            db.session.commit()
+
+            # Retornar el email con un mensaje de éxito
+            respuesta = {
+                "email": email,
+                "mensaje": "Contraseña actualizada exitosamente"
+            }
+
+            return response_success(respuesta, "Contraseña actualizada correctamente", http_status=200)
+        except Exception as e:
+            db.session.rollback()
+            return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
 
