@@ -39,9 +39,6 @@ if you want to create a migration, you must run the following commands
 ### Create a migration
 ```bash
   flask db init
-```
-
-```bash
   flask db migrate
 ```
 
@@ -58,10 +55,7 @@ if you want to create a seed, you must run the following commands
   flask seed parametros
   flask seed estados
   flask seed roles
-  flask seed menus
   flask seed proveedores
   flask seed facturas
-  flask seed usuarios
-  flask seed permisos
 ```
 

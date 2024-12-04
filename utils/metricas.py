@@ -18,10 +18,10 @@ def metrica_factura(dias, monto_factura, interes_anual):
 
     # Retornar los resultados en un JSON
     resultado = {
-        "descuento_pp": round(pronto_pago, 2),
+        "pronto_pago": round(pronto_pago, 2),
         "iva": round(iva, 2),
-        "subtotal": round(subtotal_descuento, 2),
-        "total": round(total_a_recibir, 2)
+        "subtotal_descuento": round(subtotal_descuento, 2),
+        "total_a_recibir": round(total_a_recibir, 2)
     }
     
     return resultado

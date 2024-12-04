@@ -18,11 +18,8 @@ from seeds.seeds import init_app
 # Rutas
 from routes.email_route import email_bp  
 from routes.facturas_route import facturas_bp
-from routes.usuarios_route import usuarios_bp
+from routes.usuario_route import usuarios_bp
 from routes.solicitudes_route import solicitud_bp
-from routes.desembolsos_route import desembolsos_bp
-# Cors
-from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
@@ -31,17 +28,13 @@ def create_app():
     # Inicializar extensiones
     db.init_app(app)
     migrate.init_app(app, db)
-    
-    # Habilitar CORS para toda la API
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
-    
+
     # Registrar comandos y blueprints
     init_app(app)
     app.register_blueprint(email_bp, url_prefix='/api/email')
     app.register_blueprint(facturas_bp, url_prefix='/api/factura')
     app.register_blueprint(usuarios_bp, url_prefix='/api/usuario')
     app.register_blueprint(solicitud_bp, url_prefix='/api/solicitud')
-    app.register_blueprint(desembolsos_bp, url_prefix='/api/desembolso')
 
     return app
 

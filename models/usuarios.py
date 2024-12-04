@@ -5,7 +5,7 @@ class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre_completo = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), nullable=False, unique=True)
-    password = db.Column(db.String(255), nullable=True)
+    password = db.Column(db.String(255), nullable=False)
     temp_password = db.Column(db.String(255))
     cargo = db.Column(db.String(255))
     token = db.Column(db.String(255))
