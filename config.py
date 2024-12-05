@@ -13,3 +13,4 @@ class Config:
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "vhok gjmx gfge inab")
     MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "True").lower() in ["true", "1", "t"]
     SALT_SECRET = os.getenv('SALT_SECRET') 
+    WS_FACTURAJE_URL = os.getenv("WS_FACTURAJE_URL")

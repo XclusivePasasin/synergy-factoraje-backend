@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from services.email_service import generar_plantilla, enviar_correo
 from utils.interceptor import token_required
 from utils.response import response_success, response_error
+from models.parametros import Parametro
 
 email_bp = Blueprint('email', __name__)
 
@@ -17,6 +18,14 @@ def enviar_email():
         for campo in campos_principales:
             if campo not in datos:
                 return response_error(f"El campo {campo} es obligatorio", http_status=400)
+            
+        # Obtener los parámetros adicionales de la base de datos
+        parametros = Parametro.query.filter(Parametro.clave.in_(['NOM-EMPRESA', 'ENC-EMPRESA', 'TEL-EMPRESA'])).all()
+        parametros_dict = {param.clave: param.valor for param in parametros}
+
+        nombre_empresa = parametros_dict.get('NOM-EMPRESA', 'Nombre Empresa No Definido')
+        nombre_encargado = parametros_dict.get('ENC-EMPRESA', 'Encargado No Definido')
+        telefono_empresa = parametros_dict.get('TEL-EMPRESA', 'Teléfono No Definido')
 
         # Validamos que los campos requeridos dentro de 'datos' estén presentes
         datos_plantilla = datos['datos']
@@ -24,11 +33,18 @@ def enviar_email():
             'nombreEmpresa', 'noFactura', 'monto', 
             'fechaOtorgamiento', 'fechaVencimiento', 
             'diasCredito'
-        ]  # Eliminamos 'linkBoton' de los campos requeridos ya que lo generaremos.
+        ]  
         
         for campo in campos_datos:
             if campo not in datos_plantilla:
                 return response_error(f"El campo {campo} es obligatorio dentro de 'datos'", http_status=400)
+
+         # Agregar variables adicionales a datos_plantilla
+        datos_plantilla.update({
+            'nombreEmpresaEncargada': nombre_empresa,
+            'nombreEncargadoEmpresa': nombre_encargado,
+            'telefonoEmpresa': telefono_empresa
+        })
 
         # Generar dinámicamente el link del botón
         no_factura = datos_plantilla['noFactura']

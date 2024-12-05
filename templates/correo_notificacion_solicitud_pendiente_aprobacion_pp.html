@@ -11,7 +11,7 @@
   <div style="max-width: 600px; margin: 20px auto; padding: 20px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px;">
     <!-- Encabezado -->
     <div style="border-top: 4px solid #f97316; padding-top: 10px;">
-      <p style="color: #1f2937;">Estimado/a <span>Vanessa Chicas</span>,</p>
+      <p style="color: #1f2937;">Estimado/a <span>{{ nombreContador }}</span>,</p>
     </div>
 
     <!-- Contenido principal -->
@@ -26,7 +26,7 @@
         <ul style="list-style-type: disc; list-style-position: outside; padding-left: 20px; margin: 0;">
           <li><strong>Proveedor:</strong> {{ proveedor }}</li>
           <li><strong>Factura N.°:</strong> {{ noFactura }}</li>
-          <li><strong>Monto de la Factura:</strong> ${{ montoFactura }}</li>
+          <li><strong>Monto de la Factura:</strong> {{ montoFactura }}</li>
           <li><strong>Fecha de Solicitud:</strong> {{ fechaSolicitud }}</li>
           <li><strong>Días de Crédito Restantes:</strong> {{ diasCredito }}</li>
         </ul>
@@ -49,7 +49,6 @@
       <p>Atentamente,</p>
       <p style="font-weight: bold;">Equipo de Automatización de Factoraje</p>
       <p>{{nombreEmpresa}}</p>
-      <p>[Contacto de soporte, si aplica]</p>
     </div>
   </div>
 </body>

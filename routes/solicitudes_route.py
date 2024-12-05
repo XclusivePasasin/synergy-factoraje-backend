@@ -25,7 +25,7 @@ def obtener_solicitudes():
         nombre_proveedor = request.args.get('nombre_proveedor')
         nrc = request.args.get('nrc')
         telefono = request.args.get('telefono')
-        correo = request.args.get('correo')
+        email = request.args.get('email')
         no_factura = request.args.get('no_factura')
 
         # Construir el query base
@@ -43,8 +43,8 @@ def obtener_solicitudes():
             query = query.filter(ProveedorCalificado.nrc.ilike(f"%{nrc}%"))
         if telefono:
             query = query.filter(ProveedorCalificado.telefono.ilike(f"%{telefono}%"))
-        if correo:
-            query = query.filter(ProveedorCalificado.correo_electronico.ilike(f"%{correo}%"))
+        if email:
+            query = query.filter(ProveedorCalificado.correo_electronico.ilike(f"%{email}%"))
         if no_factura:  
             query = query.filter(Factura.no_factura.ilike(f"%{no_factura}%"))
 
@@ -61,7 +61,6 @@ def obtener_solicitudes():
                 {
                     "id": solicitud.id,
                     "nombre_cliente": solicitud.nombre_cliente,
-                    "contacto": solicitud.contacto,
                     "email": solicitud.email,
                     "iva": float(solicitud.iva),
                     "subtotal": float(solicitud.subtotal),
@@ -110,7 +109,6 @@ def obtener_detalle_solicitud():
             "solicitud": {
                 "id": solicitud.id,
                 "nombre_cliente": solicitud.nombre_cliente,
-                "contacto": solicitud.contacto,
                 "email": solicitud.email,
                 "iva": float(solicitud.iva),
                 "subtotal": float(solicitud.subtotal),
@@ -120,9 +118,10 @@ def obtener_detalle_solicitud():
                 "factura": {
                     "id": solicitud.factura.id,
                     "no_factura": solicitud.factura.no_factura,
+                    "fecha_otorga": solicitud.factura.fecha_otorga.strftime("%d/%m/%Y"),
+                    "fecha_vence": solicitud.factura.fecha_vence.strftime("%d/%m/%Y"),
                     "monto": float(solicitud.factura.monto),
-                    "fecha_emision": solicitud.factura.fecha_emision.isoformat(),
-                    "fecha_vence": solicitud.factura.fecha_vence.isoformat(),
+                    "pronto_pago": float(solicitud.subtotal) - float(solicitud.iva),
                     "proveedor": {
                         "id": solicitud.factura.proveedor.id,
                         "razon_social": solicitud.factura.proveedor.razon_social,
@@ -141,12 +140,10 @@ def obtener_detalle_solicitud():
 @token_required
 def aprobar_solicitud():
     try:
-        # Obtener el ID de la solicitud desde los query parameters
         solicitud_id = request.args.get('id', type=int)
         if not solicitud_id:
             return response_error("El parámetro 'id' es obligatorio", http_status=400)
 
-        # Obtener datos del body
         data = request.get_json()
         id_aprobador = data.get('id_aprobador')  
         comentario = data.get('comentario', None)
@@ -159,10 +156,14 @@ def aprobar_solicitud():
         if not solicitud:
             return response_error("La solicitud no existe", http_status=404)
 
-        # Validar si la solicitud ya está aprobada
-        if solicitud.id_estado == 2:  
-            return response_success(None, "La solicitud ya fue aprobada. No se realizó ningún cambio.")
+         # Validar si la solicitud ya está aprobada o denegada
+        if solicitud.id_estado in [2, 3]:
+            estado = "aprobada" if solicitud.id_estado == 2 else "denegada"
+            return response_error(f"La solicitud ya fue {estado}. No se puede cambiar su estado.", http_status=409)
 
+        # Obtener el id_factura asociado a la solicitud
+        id_factura = solicitud.id_factura
+        
         # Actualizar el estado de la solicitud
         solicitud.id_estado = 2  
         solicitud.fecha_aprobacion = db.func.now()
@@ -172,6 +173,7 @@ def aprobar_solicitud():
         if comentario:
             nuevo_comentario = Comentario(
                 id_solicitud=solicitud_id,
+                id_factura=id_factura,
                 comentario=comentario,
                 created_at=db.func.now(),
                 updated_at=db.func.now()
@@ -249,7 +251,12 @@ def desaprobar_solicitud():
 
         # Obtener datos del body
         data = request.get_json()
+        id_aprobador = data.get('id_aprobador')
         comentario = data.get('comentario', None)
+
+        # Validar que el campo id_aprobador sea obligatorio
+        if not id_aprobador:
+            return response_error("El parámetro 'id_aprobador' es obligatorio", http_status=400)
 
         # Buscar la solicitud por ID
         solicitud = db.session.query(Solicitud).filter_by(id=solicitud_id).first()
@@ -257,17 +264,23 @@ def desaprobar_solicitud():
             return response_error("La solicitud no existe", http_status=404)
 
         # Validar si la solicitud ya está denegada
-        if solicitud.id_estado == 3:  
-            return response_success(None, "La solicitud ya fue denegada. No se realizó ningún cambio.")
+        if solicitud.id_estado in [2, 3]:
+            estado = "aprobada" if solicitud.id_estado == 2 else "denegada"
+            return response_error(f"La solicitud ya fue {estado}. No se puede cambiar su estado.", http_status=409)
+
+        # Obtener el id_factura asociado a la solicitud
+        id_factura = solicitud.id_factura
 
         # Actualizar el estado de la solicitud
         solicitud.id_estado = 3  
         solicitud.fecha_aprobacion = None  
+        solicitud.id_aprobador = id_aprobador  
 
         # Registrar comentario si se proporciona
         if comentario:
             nuevo_comentario = Comentario(
                 id_solicitud=solicitud_id,
+                id_factura=id_factura, 
                 comentario=comentario,
                 created_at=db.func.now(),
                 updated_at=db.func.now()
@@ -323,6 +336,5 @@ def desaprobar_solicitud():
         return response_success({"solicitud": solicitud_data}, "Solicitud denegada exitosamente. Correo de notificación enviado.")
     except Exception as e:
         return response_error(f"Error al procesar la solicitud: {str(e)}", http_status=500)
-
 
 
