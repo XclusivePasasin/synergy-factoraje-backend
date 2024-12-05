@@ -161,6 +161,9 @@ def aprobar_solicitud():
             estado = "aprobada" if solicitud.id_estado == 2 else "denegada"
             return response_error(f"La solicitud ya fue {estado}. No se puede cambiar su estado.", http_status=409)
 
+        # Obtener el id_factura asociado a la solicitud
+        id_factura = solicitud.id_factura
+        
         # Actualizar el estado de la solicitud
         solicitud.id_estado = 2  
         solicitud.fecha_aprobacion = db.func.now()
@@ -170,6 +173,7 @@ def aprobar_solicitud():
         if comentario:
             nuevo_comentario = Comentario(
                 id_solicitud=solicitud_id,
+                id_factura=id_factura,
                 comentario=comentario,
                 created_at=db.func.now(),
                 updated_at=db.func.now()
@@ -247,7 +251,12 @@ def desaprobar_solicitud():
 
         # Obtener datos del body
         data = request.get_json()
+        id_aprobador = data.get('id_aprobador')
         comentario = data.get('comentario', None)
+
+        # Validar que el campo id_aprobador sea obligatorio
+        if not id_aprobador:
+            return response_error("El parámetro 'id_aprobador' es obligatorio", http_status=400)
 
         # Buscar la solicitud por ID
         solicitud = db.session.query(Solicitud).filter_by(id=solicitud_id).first()
@@ -259,14 +268,19 @@ def desaprobar_solicitud():
             estado = "aprobada" if solicitud.id_estado == 2 else "denegada"
             return response_error(f"La solicitud ya fue {estado}. No se puede cambiar su estado.", http_status=409)
 
+        # Obtener el id_factura asociado a la solicitud
+        id_factura = solicitud.id_factura
+
         # Actualizar el estado de la solicitud
         solicitud.id_estado = 3  
         solicitud.fecha_aprobacion = None  
+        solicitud.id_aprobador = id_aprobador  
 
         # Registrar comentario si se proporciona
         if comentario:
             nuevo_comentario = Comentario(
                 id_solicitud=solicitud_id,
+                id_factura=id_factura, 
                 comentario=comentario,
                 created_at=db.func.now(),
                 updated_at=db.func.now()
@@ -322,6 +336,5 @@ def desaprobar_solicitud():
         return response_success({"solicitud": solicitud_data}, "Solicitud denegada exitosamente. Correo de notificación enviado.")
     except Exception as e:
         return response_error(f"Error al procesar la solicitud: {str(e)}", http_status=500)
-
 
 
