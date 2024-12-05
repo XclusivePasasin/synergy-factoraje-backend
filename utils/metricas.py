@@ -21,7 +21,8 @@ def metrica_factura(dias, monto_factura, interes_anual):
         "descuento_app": round(pronto_pago, 2),
         "iva": round(iva, 2),
         "subtotal": round(subtotal_descuento, 2),
-        "total": round(total_a_recibir, 2)
+        "total": round(total_a_recibir, 2),
+        "descuento_diario": descuento_diario,
     }
     
     return resultado
