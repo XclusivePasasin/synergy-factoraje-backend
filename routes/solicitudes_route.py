@@ -1,3 +1,4 @@
+from datetime import datetime, time
 from flask import Flask, request, Blueprint
 from models.parametros import Parametro
 from utils.db import db
@@ -338,3 +339,53 @@ def desaprobar_solicitud():
         return response_error(f"Error al procesar la solicitud: {str(e)}", http_status=500)
 
 
+@solicitud_bp.route('/panel-solicitudes', methods=['GET'])
+@token_required
+def panel_solicitudes():
+    try:
+        # Obtener parámetros de filtro de fechas
+        fecha_inicio = request.args.get('fecha_inicio')  # Ejemplo: '2024-12-01'
+        fecha_fin = request.args.get('fecha_fin')  # Ejemplo: '2024-12-05'
+
+        # Validar fechas
+        if fecha_inicio and fecha_fin:
+            try:
+                # Convertir las fechas a objetos datetime
+                fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+                fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
+                # Ajustar rango al día completo
+                fecha_inicio = datetime.combine(fecha_inicio, datetime.min.time())
+                fecha_fin = datetime.combine(fecha_fin, datetime.max.time())
+            except ValueError:
+                return response_error("Las fechas deben estar en formato 'YYYY-MM-DD'", http_status=400)
+
+        # Construir consultas con filtros opcionales
+        base_query = db.session.query(Solicitud)
+
+        if fecha_inicio and fecha_fin:
+            base_query = base_query.filter(Solicitud.fecha_solicitud.between(fecha_inicio, fecha_fin))
+
+        # Consultas específicas para métricas del panel
+        total_solicitudes_query = base_query.filter(Solicitud.id_estado.in_([1, 2]))
+        solicitudes_aprobadas_query = base_query.filter(Solicitud.id_estado == 2)
+        solicitudes_sin_aprobar_query = base_query.filter(Solicitud.id_estado == 1)
+
+        # Contar resultados
+        total_solicitudes = total_solicitudes_query.count()
+        solicitudes_aprobadas = solicitudes_aprobadas_query.count()
+        solicitudes_sin_aprobar = solicitudes_sin_aprobar_query.count()
+
+        # Construir respuesta
+        response_data = {
+            "total_solicitudes": total_solicitudes,
+            "solicitudes_aprobadas": solicitudes_aprobadas,
+            "solicitudes_sin_aprobar": solicitudes_sin_aprobar,
+            "filtros_aplicados": {
+                "fecha_inicio": fecha_inicio.strftime("%Y-%m-%d") if fecha_inicio else None,
+                "fecha_fin": fecha_fin.strftime("%Y-%m-%d") if fecha_fin else None
+            }
+        }
+
+        return response_success(response_data, "Métricas de solicitudes obtenidas con éxito")
+    except Exception as e:
+        return response_error(f"Error al procesar la solicitud: {str(e)}", http_status=500)

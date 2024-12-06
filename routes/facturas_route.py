@@ -30,8 +30,14 @@ def obtener_detalle_factura():
         # Calcular los días restantes para el vencimiento
         fecha_actual = datetime.now()
         dias_restantes = (factura.fecha_vence - fecha_actual).days
+
+        # Determinar el estado de la solicitud en función de los días restantes
         if dias_restantes < 0:
-            return response_error("La fecha de vencimiento ya pasó", http_status=409)
+            estado_solicitud = 4  
+        else:
+            # Consultar el estado de la solicitud de pronto pago
+            solicitud = Solicitud.query.filter_by(id_factura=factura.id).first()
+            estado_solicitud = solicitud.id_estado if solicitud else 0
 
         # Obtener el parámetro de interés anual
         parametro = Parametro.query.filter_by(clave='INT_AN_PP').first()
@@ -55,13 +61,16 @@ def obtener_detalle_factura():
                 "fecha_otorga": factura.fecha_otorga.strftime("%d/%m/%Y"),
                 "fecha_vence": factura.fecha_vence.strftime("%d/%m/%Y"),
                 "monto": float(factura.monto),
-                **resultado 
+                "estado": estado_solicitud,
+                **resultado
             }
         }
 
         return response_success(resultado_final, "Detalle de factura obtenido correctamente", http_status=200)
     except Exception as e:
         return response_error(str(e), http_status=500)
+
+
 
 @facturas_bp.route('/solicitar-pago-factura', methods=['POST'])
 @token_required
