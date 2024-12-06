@@ -55,6 +55,7 @@ su factura está disponible para aplicar a pronto pago.
         "factura": {
             "descuento_pp": 33.0,
             "dias_restantes": 44,
+            "estado": 4,
             "fecha_otorga": "01/11/2024",
             "fecha_vence": "18/01/2025",
             "iva": 4.29,
