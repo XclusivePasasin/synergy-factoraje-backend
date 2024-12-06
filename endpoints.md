@@ -517,3 +517,34 @@ su factura está disponible para aplicar a pronto pago.
     "message": "Solicitud denegada exitosamente. Correo de notificación enviado."
 }
 ```
+
+### **Obtener métricas de solicitudes**
+**Endpoint:** `GET /api/solicitud/panel-solicitudes`
+**Descripción:** Devuelve las métricas de solicitudes, incluyendo el número de solicitudes aprobadas y pendientes.
+
+**Query Parameters (opcional):**
+- 'fecha_inicio', `fecha_fin`: Rango de fechas.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Response:**
+```json
+{
+    "code": 0,
+    "data": {
+        "filtros_aplicados": {
+            "fecha_fin": "2024-12-05",
+            "fecha_inicio": "2024-12-01"
+        },
+        "solicitudes_aprobadas": 1,
+        "solicitudes_sin_aprobar": 1,
+        "total_solicitudes": 2
+    },
+    "message": "Métricas de solicitudes obtenidas con éxito"
+}
+```
