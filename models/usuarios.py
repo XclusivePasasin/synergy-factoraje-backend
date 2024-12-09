@@ -3,7 +3,8 @@ from utils.db import db
 class Usuario(db.Model):
     __tablename__ = 'usuarios'
     id = db.Column(db.Integer, primary_key=True)
-    nombre_completo = db.Column(db.String(255), nullable=False)
+    nombres = db.Column(db.String(255), nullable=False)  
+    apellidos = db.Column(db.String(255), nullable=False)  
     email = db.Column(db.String(255), nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=True)
     temp_password = db.Column(db.String(255))
@@ -14,3 +15,5 @@ class Usuario(db.Model):
     rol = db.relationship('Rol', backref='usuarios')
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    activo = db.Column(db.Boolean, default=False, nullable=False)  
+    reg_activo = db.Column(db.Boolean, default=False, nullable=False)  

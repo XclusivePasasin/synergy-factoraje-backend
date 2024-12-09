@@ -10,6 +10,7 @@ from models.roles import Rol
 from models.parametros import Parametro
 from utils.db import db
 from utils.response import response_success, response_error
+from sqlalchemy.exc import SQLAlchemyError
 from utils.destructor import blacklist_token
 from services.email_service import *
 
@@ -18,15 +19,19 @@ class UsuarioService:
     def crear_usuario(data):
         try:
             # Validar los campos requeridos
-            campos_requeridos = ['nombre_completo', 'email', 'cargo', 'id_rol']
+            campos_requeridos = ['nombres', 'apellidos', 'email', 'cargo', 'id_rol']
             for campo in campos_requeridos:
                 if campo not in data:
                     return response_error(f"El campo {campo} es obligatorio", http_status=400)
 
-            nombre_completo = data['nombre_completo']
+            nombres = data['nombres']
+            apellidos = data['apellidos']
             email = data['email']
             cargo = data['cargo']
             id_rol = data['id_rol']
+            
+            if len(nombres) < 2 or len(nombres) > 50 or len(apellidos) < 2 or len(apellidos) > 50:
+                return response_error("El formato o longitud del nombre o apellidos no es válido", http_status=400)
 
             # Validar longitud y formato del correo electrónico
             if len(email) < 10 or len(email) > 100 or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
@@ -43,6 +48,7 @@ class UsuarioService:
                 return response_error("El correo ya está registrado", http_status=409)
 
             # Generar contraseña temporal
+            # temp_password = UsuarioService.generar_contraseña_temp()
             temp_password = '12345678'  
             print('temp_password: ', temp_password)
 
@@ -52,7 +58,8 @@ class UsuarioService:
 
             # Crear el nuevo usuario
             nuevo_usuario = Usuario(
-                nombre_completo=nombre_completo,
+                nombres=nombres,
+                apellidos=apellidos,
                 email=email,
                 temp_password=hashed_temp_password,
                 cargo=cargo,
@@ -72,10 +79,10 @@ class UsuarioService:
 
             # Enviar correo con las credenciales al usuario
             datos_credenciales = {
-                "nombreUsuario": nombre_completo,
+                "nombreUsuario": nombres + ' ' + apellidos,
                 "correoElectronico": email,
                 "contrasenaTemporal": temp_password,
-                "nombreEmpresa": nombre_empresa,  # Incluir el nombre de la empresa
+                "nombreEmpresa": nombre_empresa,  
             }
             asunto = f"Credenciales de acceso al sistema de pronto pago"
             contenido_html_credenciales = generar_plantilla('correo_contraseña_temporal.html', datos_credenciales)
@@ -86,7 +93,8 @@ class UsuarioService:
             # Retornar detalles del usuario creado (sin incluir contraseñas)
             respuesta = {
                 "usuario_id": nuevo_usuario.id,
-                "nombre_completo": nuevo_usuario.nombre_completo,
+                "nombres": nuevo_usuario.nombres,
+                "apellidos": nuevo_usuario.apellidos,
                 "email": nuevo_usuario.email,
                 "cargo": nuevo_usuario.cargo,
                 "id_rol": nuevo_usuario.id_rol
@@ -118,6 +126,13 @@ class UsuarioService:
             usuario_encontrado = Usuario.query.filter_by(email=email).first()
             if not usuario_encontrado:
                 return response_error("El usuario no existe", http_status=401)
+            
+            # Verificar si el usuario está marcado como inactivo
+            if not usuario_encontrado.activo:
+                return response_error("Este usuario está inactivo", http_status=403)  
+            
+            if not usuario_encontrado.reg_activo:
+                return response_error("Este usuario ha sido eliminado del sistema", http_status=403)  
 
             # Generar el hash de la contraseña ingresada
             salt = current_app.config.get('SALT_SECRET')
@@ -170,7 +185,8 @@ class UsuarioService:
             # Construir la respuesta con los datos del usuario y el token
             usuario_data = {
                 "id": usuario_encontrado.id,
-                "name": usuario_encontrado.nombre_completo,
+                "nombres": usuario_encontrado.nombres,
+                "apellidos": usuario_encontrado.apellidos,
                 "email": usuario_encontrado.email,
                 "role": rol.rol if rol else "Sin rol asignado",
                 "permissions": permisos_data, 
@@ -226,7 +242,8 @@ class UsuarioService:
 
             return {
                 "usuario_id": usuario_encontrado.id,
-                "nombre_completo": usuario_encontrado.nombre_completo,
+                "nombres": usuario_encontrado.nombres,
+                "apellidos": usuario_encontrado.apellidos,
                 "email": usuario_encontrado.email,
                 "token": token
             }
@@ -289,7 +306,8 @@ class UsuarioService:
             # Construir los datos del usuario
             usuario_data = {
                 "id": usuario_encontrado.id,
-                "name": usuario_encontrado.nombre_completo,
+                "nombres": usuario_encontrado.nombres,
+                "apellidos": usuario_encontrado.apellidos,
                 "email": usuario_encontrado.email,
                 "role": rol.rol if rol else "Sin rol asignado",
                 "permissions": permisos_data
@@ -394,3 +412,86 @@ class UsuarioService:
             db.session.rollback()
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
 
+    @staticmethod
+    def actualizar_usuario(usuario_id, data):
+        """
+        Actualiza la información de un usuario excepto el correo electrónico.
+        """
+        try:
+            # Buscar al usuario por su ID
+            usuario = Usuario.query.get(usuario_id)
+            if not usuario:
+                return response_error("Usuario no encontrado", http_status=404)
+
+            if 'nombres' in data and data['nombres'].strip():
+                usuario.nombres = data['nombres'].strip()
+            else:
+                return response_error("El campo 'nombres' está vacío o no es válido", http_status=400)
+
+            if 'apellidos' in data and data['apellidos'].strip():
+                usuario.apellidos = data['apellidos'].strip()
+            else:
+                return response_error("El campo 'apellidos' está vacío o no es válido", http_status=400)
+
+            if 'id_rol' in data and data['id_rol']:
+                rol = Rol.query.get(data['id_rol'])
+                if not rol:
+                    return response_error("Rol no encontrado", http_status=404)
+                usuario.rol = rol
+            else:
+                return response_error("El campo 'id_rol' está vacío o no es válido", http_status=400)
+
+            if 'cargo' in data and data['cargo'].strip():
+                usuario.cargo = data['cargo'].strip()
+            else:
+                return response_error("El campo 'cargo' está vacío o no es válido", http_status=400)
+
+            # Actualización de la contraseña si se proporciona
+            if 'password' in data:
+                if data['password'] and len(data['password']) >= 8:
+                    salt = current_app.config['SALT_SECRET']
+                    hashed_password = hashlib.sha256((data['password'] + salt).encode('utf-8')).hexdigest()
+                    usuario.password = hashed_password
+                elif data['password']:  
+                    return response_error("La contraseña debe tener al menos 8 caracteres.", http_status=400)
+            
+            db.session.commit()
+            return response_success({"mensaje": "Usuario actualizado exitosamente"}, http_status=200)
+
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+        
+    @staticmethod
+    def cambiar_estado_usuario(usuario_id, activo):
+        try:
+            usuario = Usuario.query.get(usuario_id)
+            if not usuario:
+                return response_error("Usuario no encontrado", http_status=404)
+            
+            # Actualizar el estado activo
+            usuario.activo = activo
+            db.session.commit()
+            return response_success({"mensaje": f"Estado del usuario {'activado' if activo else 'desactivado'} exitosamente"}, http_status=200)
+        
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+    
+    @staticmethod
+    def eliminar_usuario(usuario_id):
+        try:
+            usuario = Usuario.query.get(usuario_id)
+            if not usuario:
+                return response_error("Usuario no encontrado", http_status=404)
+            
+            usuario.reg_activo = False
+            db.session.commit()
+            return response_success({"mensaje": "Usuario eliminado exitosamente"}, http_status=200)
+        
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+        
+    
+        
