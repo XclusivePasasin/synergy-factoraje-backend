@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from services.usuario_service import UsuarioService
+from models.usuarios import Usuario
 from utils.interceptor import token_required
 from utils.response import response_success, response_error
 
@@ -66,7 +67,7 @@ def cerrar_sesion():
     
 @usuarios_bp.route('/cambiar-contraseña', methods=['POST'])
 @token_required
-def primera_actualizacion_contrasena_inicio_sesion():
+def actualizacion_contrasena_inicio_sesion():
     """
     Endpoint para la primera actualización de contraseña al inicio de sesión.
     """
@@ -81,3 +82,125 @@ def primera_actualizacion_contrasena_inicio_sesion():
         return UsuarioService.actualizar_contraseña(email, nueva_contrasena)
     except Exception as e:
         return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+    
+
+@usuarios_bp.route('/actualizar-usuario', methods=['PUT'])
+@token_required
+def actualizar_usuario_route():
+    """
+    Endpoint para actualizar la información de un usuario excepto el correo electrónico.
+    Utiliza el usuario_id como query parameter para identificar al usuario a actualizar.
+    """
+    usuario_id = request.args.get('usuario_id', type=int)  
+    if not usuario_id:
+        return response_error("usuario_id es requerido", http_status=400)
+
+    try:
+        data = request.get_json()
+        if not data:
+            return response_error("Datos no proporcionados", http_status=400)
+
+        return UsuarioService.actualizar_usuario(usuario_id, data)
+    except Exception as e:
+        return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+    
+@usuarios_bp.route('/cambiar-estado-usuario', methods=['POST'])
+@token_required
+def cambiar_estado_usuario_route():
+    """
+    Endpoint para activar o desactivar un usuario.
+    Recibe el usuario_id y el nuevo estado activo en el cuerpo de la solicitud.
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return response_error("Datos no proporcionados", http_status=400)
+        
+        # Validación de los datos recibidos
+        usuario_id = data.get('usuario_id')
+        activo = data.get('activo')
+
+        if usuario_id is None:
+            return response_error("El 'usuario_id' es requerido", http_status=400)
+        if activo is None:
+            return response_error("El estado 'activo' es requerido", http_status=400)
+
+        # Llamada al servicio para actualizar el estado activo del usuario
+        return UsuarioService.cambiar_estado_usuario(usuario_id, activo)
+
+    except Exception as e:
+        return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+    
+@usuarios_bp.route('/listar-usuarios', methods=['GET'])
+@token_required
+def listar_usuarios():
+    """
+    Endpoint para listar todos los usuarios que no han sido eliminados.
+    Se incluyen tanto usuarios activos como inactivos, pero no aquellos marcados como eliminados (reg_activo = False).
+    """
+    try:
+        # Filtrar usuarios activos e inactivos pero no eliminados
+        usuarios = Usuario.query.filter(Usuario.reg_activo == True).all()  
+        usuarios_data = {
+            "usuarios": [
+                {
+                    "id": usuario.id,
+                    "nombres": usuario.nombres,
+                    "apellidos": usuario.apellidos,
+                    "email": usuario.email,
+                    "cargo": usuario.cargo,
+                    "activo": usuario.activo
+                }
+                for usuario in usuarios
+            ]
+        }
+        return response_success(usuarios_data, "Lista de usuarios obtenida exitosamente", http_status=200)
+    except Exception as e:
+        return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
+@usuarios_bp.route('/detalle-usuario', methods=['GET'])
+@token_required
+def detalle_usuario():
+    """
+    Endpoint para obtener el detalle de un usuario específico.
+    El usuario_id se recibe como query parameter.
+    """
+    usuario_id = request.args.get('usuario_id', type=int)
+    if not usuario_id:
+        return response_error("El parámetro 'usuario_id' es obligatorio y debe ser un número válido.", http_status=400)
+
+    try:
+        usuario = Usuario.query.filter_by(id=usuario_id, reg_activo=True).first()
+        if not usuario:
+            return response_error("Usuario no encontrado", http_status=404)
+
+        usuario_data = {
+            "id": usuario.id,
+            "nombres": usuario.nombres,
+            "apellidos": usuario.apellidos,
+            "email": usuario.email,
+            "cargo": usuario.cargo,
+            "activo": usuario.activo,
+        }
+        return response_success(usuario_data, "Detalle del usuario obtenido exitosamente", http_status=200)
+    except Exception as e:
+        return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+    
+
+@usuarios_bp.route('/eliminar-usuario', methods=['DELETE'])
+@token_required
+def eliminar_usuario_route():
+    """
+    Endpoint para "eliminar" lógicamente un usuario.
+    Recibe el usuario_id como query parameter.
+    """
+    try:
+        usuario_id = request.args.get('usuario_id', type=int)
+        if not usuario_id:
+            return response_error("El parámetro 'usuario_id' es obligatorio y debe ser un entero válido.", http_status=400)
+
+        return UsuarioService.eliminar_usuario(usuario_id)
+
+    except Exception as e:
+        return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
