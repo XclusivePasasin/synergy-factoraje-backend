@@ -113,7 +113,8 @@ su factura está disponible para aplicar a pronto pago.
 **Request Body:**
 ```json
 {
-    "nombre_completo": "Julian Zan",
+    "nombres": "Julian",
+    "apellidos": "Zan",
     "email": "julian.zan4@example.com",
     "cargo": "Gerente",
     "id_rol": 1
@@ -129,7 +130,8 @@ su factura está disponible para aplicar a pronto pago.
         "cargo": "Administrador",
         "email": "tes1t@admin.com",
         "id_rol": 1,
-        "nombre_completo": "Test1",
+        "nombres": "Nombresxd",
+        "apellidos": "Apellidosxd",
         "usuario_id": 3
     },
     "message": "Usuario creado exitosamente"
@@ -143,6 +145,145 @@ su factura está disponible para aplicar a pronto pago.
     "message": "El correo ya está registrado"
 }
 ```
+
+### **Cambiar Estado de Usuario**
+**Endpoint:** `POST /api/usuario/cambiar-estado-usuario`
+**Descripción:** Cambia el estado de activación del usuario especificado.
+
+**Request Body:**
+```json
+{
+    "usuario_id": 1,
+    "activo": true or false
+}
+```
+
+**Response (success):**
+```json
+{
+    "code": 0,
+    "data": {
+        "mensaje": "Estado del usuario activado exitosamente"
+    },
+    "message": "Estado del usuario activado exitosamente"
+}
+```
+
+**Response (error):**
+```json
+{
+    "code": 1,
+    "data": null,
+    "message": "El usuario no existe"
+}
+```
+
+### **Modificar Usuario**
+**Endpoint:** `PUT /api/usuario/actualizar-usuario`
+**Descripción:** Modifica los datos de un usuario existente.
+
+**Query Parameters (Obligatorio):**
+- 'usuario_id': ID del usuario que se desea actualizar.
+
+
+**Request Body:**
+```json
+{
+    "nombres": "Juan Antonio",
+    "apellidos": "Pasasin",
+    "id_rol": 1,
+    "cargo": "Director",
+    "password": "12345678"
+}
+```
+
+**Response (success):**
+```json
+{
+    "code": 0,
+    "data": {
+        "mensaje": "Usuario actualizado exitosamente"
+    },
+    "message": "Usuario actualizado exitosamente"
+}
+```
+
+**Response (error):**
+```json
+{
+    "code": 1,
+    "data": null,
+    "message": "El campo 'nombres' está vacío o no es válido"
+}
+```
+### **Listar Usuarios**
+**Endpoint:** `GET /api/usuario/listar-usuarios`
+**Descripción:** Devuelve una lista de todos los usuarios que no han sido eliminados.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+**Response:**
+```json
+{
+    "code": 0,
+    "data": {
+        "usuarios": [
+            {
+                "id": 1,
+                "nombres": "Marta",
+                "apellidos": "Lopez",
+                "email": "test@test.com",
+                "cargo": "Administrador",
+                "activo": true
+            },
+            {
+                "id": 2,
+                "nombres": "Juan",
+                "apellidos": "Moran",
+                "email": "test@test.com",
+                "cargo": "Agente Synergy",
+                "activo": false
+            }
+        ]
+    },
+    "message": "Lista de usuarios obtenida exitosamente"
+}
+```
+
+### **Obtener Detalle de Usuario**
+**Endpoint:** `GET /api/usuario/detalle-usuario`
+**Descripción:** Devuelve los detalles de un usuario específico.
+
+**Query Parameters (Obligatorio):**
+- 'usuario_id': ID del usuario que se desea obtener.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Response:**
+```json
+{
+    "code": 0,
+    "data": {
+        "id": 1,
+        "nombres": "Sonia",
+        "apellidos": "Adame",
+        "email": "test@test.com",
+        "cargo": "Administrador",
+        "activo": true
+    },
+    "message": "Detalle del usuario obtenido exitosamente"
+}
+```
+
 
 ### **Iniciar Sesión**
 
@@ -169,7 +310,8 @@ su factura está disponible para aplicar a pronto pago.
         "usuario": {
             "email": "tes1t@admin.com",
             "id": 3,
-            "name": "Test1",
+            "nombres": "nombresxd",
+            "apellidos": "apellidosxd",
             "permissions": [
                 {
                     "create_perm": 1,
@@ -302,6 +444,30 @@ su factura está disponible para aplicar a pronto pago.
     "code": 0
 }
 
+```
+### **Eliminar Usuario**
+**Endpoint:** `DELETE /api/usuario/eliminar-usuario`
+**Descripción:** Elimina un usuario de la base de datos.
+
+**Query Parameters (Obligatorio):**
+- 'usuario_id': ID del usuario que se desea eliminar.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Response:**
+```json
+{
+    "code": 0,
+    "data": {
+        "mensaje": "Usuario eliminado exitosamente"
+    },
+    "message": "Usuario eliminado exitosamente"
+}
 ```
 
 ## Endpoints Solicitudes
