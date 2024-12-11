@@ -16,6 +16,27 @@ def actualizar_permisos():
         data = request.get_json()
         if not data:
             return response_error("Datos no proporcionados", http_status=400)
+
+        if 'id_rol' not in data or 'permisos' not in data:
+            return response_error("El payload debe contener 'id_rol' y 'permisos'.", http_status=400)
+
         return PermisosService.actualizar_permisos(data)
+
+    except KeyError as e:
+        return response_error(f"Falta una clave en el payload: {str(e)}", http_status=400)
+
+    except Exception as e:
+        return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
+@permisos_bp.route('/listar-permisos', methods=['GET'])
+@token_required
+def listar_permisos():
+    try:
+        id_rol = request.args.get('id_rol', type=int)
+        if id_rol is None:
+            return response_error("El parámetro 'id_rol' es obligatorio.", http_status=400)
+
+        return PermisosService.obtener_permisos_por_rol(id_rol)
+
     except Exception as e:
         return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
