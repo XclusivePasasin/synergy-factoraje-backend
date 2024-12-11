@@ -63,5 +63,7 @@ if you want to create a seed, you must run the following commands
   flask seed facturas
   flask seed usuarios
   flask seed permisos
+
+  flask seed parametros && flask seed estados && seed roles && flask seed menus && flask seed proveedores && flask seed facturas && flask seed usuarios && flask seed permisos
 ```
 
