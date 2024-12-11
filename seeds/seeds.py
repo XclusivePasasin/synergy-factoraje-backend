@@ -84,18 +84,23 @@ def seed_roles():
                 "descripcion": None
             },
             {
-                "rol": "Contador",
-                "nombre": "Agente Synergy",
+                "rol": "Operador de ICC",
+                "nombre": "Operador de ICC",
+                "descripcion": None
+            },
+            {
+                "rol": "Operador de Synergy",
+                "nombre": "Operador de Synergy",
                 "descripcion": None
             },
             {
                 "rol": "Auditor",
-                "nombre": "Auditor Synergy",
+                "nombre": "Auditor",
                 "descripcion": None
             },
             {
                 "rol": "Solicitador",
-                "nombre": "Solicitante de pronto pago",
+                "nombre": "Solicitante de Pronto Pago",
                 "descripcion": None
             },
         ]
@@ -361,9 +366,9 @@ def seed_menus():
             },
             {
                 "id": 8,
-                "menu": "Usuarios",
+                "menu": "Administracion",
                 "description": None,
-                "path": "/usuarios",
+                "path": "/administracion",
                 "icon": "pi pi-users",
                 "padre": 0,
                 "orden": 5,
@@ -395,6 +400,24 @@ def seed_menus():
                 "padre": 0,
                 "orden": 7,
             },
+            {
+                "id": 12,
+                "menu": "Usuarios",
+                "description": None,
+                "path": "/admin/usuarios",
+                "icon": "pi pi-users",
+                "padre": 8,
+                "orden": 5.1,
+            },
+            {
+                "id": 13,
+                "menu": "Roles y permisos",
+                "description": None,
+                "path": "/admin/roles-permisos",
+                "icon": "pi pi-shield",
+                "padre": 8,
+                "orden": 5.2,
+            },
         ]
 
         for menu in menus:
@@ -417,27 +440,32 @@ def seed_permisos():
     """Seed de permisos"""
     with current_app.app_context():
         permisos = [
-            {"id": 1, "id_rol": 1, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 2, "id_rol": 1, "id_menu": 2, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 3, "id_rol": 1, "id_menu": 3, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 4, "id_rol": 1, "id_menu": 4, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 5, "id_rol": 1, "id_menu": 5, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 6, "id_rol": 1, "id_menu": 6, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 7, "id_rol": 1, "id_menu": 7, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 8, "id_rol": 1, "id_menu": 8, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 9, "id_rol": 2, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 10, "id_rol": 2, "id_menu": 2, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 11, "id_rol": 2, "id_menu": 3, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 12, "id_rol": 2, "id_menu": 4, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 13, "id_rol": 2, "id_menu": 5, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 14, "id_rol": 2, "id_menu": 6, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 15, "id_rol": 1, "id_menu": 9, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 16, "id_rol": 1, "id_menu": 10, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 17, "id_rol": 3, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 18, "id_rol": 3, "id_menu": 9, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 19, "id_rol": 3, "id_menu": 10, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
-            {"id": 20, "id_rol": 4, "id_menu": 11, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True},
+            {"id": 1, "id_rol": 1, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
+            {"id": 2, "id_rol": 1, "id_menu": 2, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
+            {"id": 3, "id_rol": 1, "id_menu": 3, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
+            {"id": 4, "id_rol": 1, "id_menu": 4, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
+            {"id": 5, "id_rol": 1, "id_menu": 5, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
+            {"id": 6, "id_rol": 1, "id_menu": 6, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
+            {"id": 7, "id_rol": 1, "id_menu": 7, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
+            {"id": 8, "id_rol": 1, "id_menu": 8, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
+            {"id": 9, "id_rol": 1, "id_menu": 9, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
+            {"id": 10, "id_rol": 1, "id_menu": 10, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
+
+            {"id": 11, "id_rol": 2, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
+            {"id": 12, "id_rol": 2, "id_menu": 2, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
+            {"id": 13, "id_rol": 2, "id_menu": 3, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
+            {"id": 14, "id_rol": 2, "id_menu": 4, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
+            {"id": 15, "id_rol": 2, "id_menu": 5, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
+            {"id": 16, "id_rol": 2, "id_menu": 6, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
+            
+
+            {"id": 17, "id_rol": 3, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
+            {"id": 18, "id_rol": 3, "id_menu": 9, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
+            {"id": 19, "id_rol": 3, "id_menu": 10, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
+
+            {"id": 20, "id_rol": 4, "id_menu": 11, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False}
         ]
+
 
         for permiso in permisos:
             new_permiso = Permiso(
