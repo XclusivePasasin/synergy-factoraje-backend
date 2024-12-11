@@ -114,14 +114,14 @@ def seed_proveedores():
     with current_app.app_context():
         proveedores = [
             {
-                "razon_social": "TechNova Solutions S.A.",
+                "razon_social": "Clobi Technologies S.A. de C.V.",
                 "nrc": "NRC12345",
                 "nit": "NIT456789123",
                 "min_factoring": 1000.00,
                 "max_factoring": 5000.00,
                 "cuenta_bancaria": "1234567890",
                 "nombre_contacto": "Juan Pérez",
-                "correo_electronico": "contacto@technova.com",
+                "correo_electronico": "clobitech@clobitech.com",
                 "telefono": "555-12345"
             },
             {
@@ -206,114 +206,74 @@ def seed_facturas():
     with current_app.app_context():
         facturas = [
             {
-                "no_factura": "FAC001",
-                "monto": 1500.00,
-                "fecha_emision": "2024-11-01 10:00:00",
-                "fecha_vence": "2025-01-18 10:00:00",
-                "fecha_otorga": "2024-11-01 11:00:00",
-                "dias_credito": 78,
-                "nombre_proveedor": "TechNova Solutions S.A.",
-                "nit": "NIT456789123",
+                "no_factura": "DTE-03M001P001-000000000000580",
+                "monto": 1806.87,
+                "fecha_emision": "2024-11-30 00:00:00",
+                "fecha_vence": "2025-01-30 00:00:00",  
+                "fecha_otorga": "2024-11-30 01:00:00",  
+                "dias_credito": 60,
+                "nombre_proveedor": "2V TRADING EL SALVADOR, S.A. DE C.V",
+                "nit": "0614-271014-103-8",
+                "noti_cliente": "N",
+                "noti_contador": "N",
+                "factura_hash": "hash_pl0001_580",
                 "id_proveedor": 1
             },
             {
-                "no_factura": "FAC002",
-                "monto": 3000.00,
-                "fecha_emision": "2024-11-05 09:00:00",
-                "fecha_vence": "2025-01-19 09:00:00",
-                "fecha_otorga": "2024-11-05 09:30:00",
-                "dias_credito": 75,
-                "nombre_proveedor": "CodeFusion Labs",
-                "nit": "NIT123456789",
+                "no_factura": "DTE-03-M001P001-0000000000000536",
+                "monto": 2529.62,
+                "fecha_emision": "2024-11-12 00:00:00",
+                "fecha_vence": "2025-01-12 00:00:00",  
+                "fecha_otorga": "2024-11-12 01:00:00",  
+                "dias_credito": 61,
+                "nombre_proveedor": "2V TRADING EL SALVADOR, S.A. DE C.V",
+                "nit": "0614-271014-103-8",
+                "noti_cliente": "N",
+                "noti_contador": "N",
+                "factura_hash": "hash_pl0001_536",
+                "id_proveedor": 1
+            },
+            {
+                "no_factura": "DTE-03-S002P001-240000000000872",
+                "monto": 7573.80,
+                "fecha_emision": "2024-11-30 00:00:00",
+                "fecha_vence": "2025-01-30 00:00:00",  
+                "fecha_otorga": "2024-11-30 01:00:00",  
+                "dias_credito": 60,
+                "nombre_proveedor": "2V TRADING EL SALVADOR, S.A. DE C.V",
+                "nit": "0614-271014-103-8",
+                "noti_cliente": "N",
+                "noti_contador": "N",
+                "factura_hash": "hash_pl0001_872",
+                "id_proveedor": 1
+            },
+            {
+                "no_factura": "DTE-03-M001P001-000000000000579",
+                "monto": 2529.62,
+                "fecha_emision": "2024-11-30 00:00:00",
+                "fecha_vence": "2025-01-30 00:00:00",  
+                "fecha_otorga": "2024-11-30 01:00:00",  
+                "dias_credito": 11,
+                "nombre_proveedor": "2V TRADING EL SALVADOR, S.A. DE C.V",
+                "nit": "0614-271014-103-8",
+                "noti_cliente": "N",
+                "noti_contador": "N",
+                "factura_hash": "hash_pl0001_579",
+                "id_proveedor": 1
+            },
+            {
+                "no_factura": "DTE-03-M001P001-000000000002607",
+                "monto": 1345.49,
+                "fecha_emision": "2024-10-30 00:00:00",
+                "fecha_vence": "2024-12-30 00:00:00", 
+                "fecha_otorga": "2024-10-30 01:00:00",  
+                "dias_credito": 60,
+                "nombre_proveedor": "BRENNTAG EL SALVADOR, S.A. DE C.V.",
+                "nit": "0614-150277-002-9",
+                "noti_cliente": "N",
+                "noti_contador": "N",
+                "factura_hash": "hash_pl0003_2607",
                 "id_proveedor": 2
-            },
-            {
-                "no_factura": "FAC003",
-                "monto": 4500.00,
-                "fecha_emision": "2024-11-10 08:30:00",
-                "fecha_vence": "2025-02-01 08:30:00",
-                "fecha_otorga": "2024-11-10 09:00:00",
-                "dias_credito": 83,
-                "nombre_proveedor": "FutureTech Innovators",
-                "nit": "NIT987654321",
-                "id_proveedor": 3
-            },
-            {
-                "no_factura": "FAC004",
-                "monto": 2000.00,
-                "fecha_emision": "2024-11-12 10:00:00",
-                "fecha_vence": "2025-02-12 10:00:00",
-                "fecha_otorga": "2024-11-12 11:00:00",
-                "dias_credito": 90,
-                "nombre_proveedor": "AlphaOmega Services Ltd.",
-                "nit": "NIT111222333",
-                "id_proveedor": 4
-            },
-            {
-                "no_factura": "FAC005",
-                "monto": 3500.00,
-                "fecha_emision": "2024-11-15 09:00:00",
-                "fecha_vence": "2025-01-30 09:00:00",
-                "fecha_otorga": "2024-11-15 10:00:00",
-                "dias_credito": 76,
-                "nombre_proveedor": "NextWave IT Solutions",
-                "nit": "NIT789654321",
-                "id_proveedor": 5
-            },
-            {
-                "no_factura": "FAC006",
-                "monto": 1200.00,
-                "fecha_emision": "2024-11-18 14:00:00",
-                "fecha_vence": "2025-02-05 14:00:00",
-                "fecha_otorga": "2024-11-18 15:00:00",
-                "dias_credito": 79,
-                "nombre_proveedor": "DigitalGenio Tech",
-                "nit": "NIT246802468",
-                "id_proveedor": 6
-            },
-            {
-                "no_factura": "FAC007",
-                "monto": 5000.00,
-                "fecha_emision": "2024-11-20 11:00:00",
-                "fecha_vence": "2025-03-01 11:00:00",
-                "fecha_otorga": "2024-11-20 12:00:00",
-                "dias_credito": 100,
-                "nombre_proveedor": "Quantum Leap Solutions",
-                "nit": "NIT135791357",
-                "id_proveedor": 7
-            },
-            {
-                "no_factura": "FAC008",
-                "monto": 800.00,
-                "fecha_emision": "2024-11-22 13:00:00",
-                "fecha_vence": "2025-01-10 13:00:00",
-                "fecha_otorga": "2024-11-22 14:00:00",
-                "dias_credito": 49,
-                "nombre_proveedor": "DigitalGenio Tech",
-                "nit": "NIT246802468",
-                "id_proveedor": 5
-            },
-            {
-                "no_factura": "FAC009",
-                "monto": 2500.00,
-                "fecha_emision": "2024-11-25 10:00:00",
-                "fecha_vence": "2025-02-05 10:00:00",
-                "fecha_otorga": "2024-11-25 11:00:00",
-                "dias_credito": 72,
-                "nombre_proveedor": "FutureTech Innovators",
-                "nit": "NIT987654321",
-                "id_proveedor": 3
-            },
-            {
-                "no_factura": "FAC010",
-                "monto": 6000.00,
-                "fecha_emision": "2024-11-28 16:00:00",
-                "fecha_vence": "2025-03-15 16:00:00",
-                "fecha_otorga": "2024-11-28 17:00:00",
-                "dias_credito": 107,
-                "nombre_proveedor": "NextWave IT Solutions",
-                "nit": "NIT789654321",
-                "id_proveedor": 5
             }
         ]
 
@@ -322,8 +282,10 @@ def seed_facturas():
             if not factura:
                 factura = Factura(**factura_data)
                 db.session.add(factura)
+
         db.session.commit()
         print("Seeds para 'facturas' creados exitosamente.")
+
         
         
 from models.usuarios import Usuario
@@ -500,7 +462,8 @@ def seed_usuarios():
         usuarios = [
             {
                 "id": 1,
-                "nombre_completo": "Administrador",
+                "nombres": "Administrador",
+                "apellidos": "Clobi Technologies",
                 "email": "clobitechadmin@clobitech.com",
                 "password": None,
                 "temp_password": "9c067f586228cecb9c8bc50de2b33eeb7a2c2c73d406441a87977109b631207d",
@@ -508,12 +471,15 @@ def seed_usuarios():
                 "token": "",
                 "token_date_end": None,
                 "id_rol": 1,
+                "activo": True,
+                "reg_activo": True,
                 "created_at": "2024-12-02 08:27:55",
                 "updated_at": "2024-12-02 08:29:08"
             },
             {
                 "id": 2,
-                "nombre_completo": "Sonia Navarro",
+                "nombres": "Sonia",
+                "apellidos": "Navarro",
                 "email": "sonia.navarro@clobitech.com",
                 "password": None,
                 "temp_password": "9c067f586228cecb9c8bc50de2b33eeb7a2c2c73d406441a87977109b631207d",
@@ -521,12 +487,15 @@ def seed_usuarios():
                 "token": "",
                 "token_date_end": None,
                 "id_rol": 2,
+                "activo": True,
+                "reg_activo": True,
                 "created_at": "2024-12-02 11:22:00",
                 "updated_at": "2024-12-02 11:30:27"
             },
             {
                 "id": 3,
-                "nombre_completo": "Antonio Pasasin",
+                "nombres": "Antonio",
+                "apellidos": "Pasasin",
                 "email": "eliazar.rebollo23@gmail.com",
                 "password": None,
                 "temp_password": "9c067f586228cecb9c8bc50de2b33eeb7a2c2c73d406441a87977109b631207d",
@@ -534,12 +503,15 @@ def seed_usuarios():
                 "token": "",
                 "token_date_end": None,
                 "id_rol": 3,
+                "activo": True,
+                "reg_activo": True,
                 "created_at": "2024-12-02 11:28:45",
                 "updated_at": "2024-12-02 11:32:10"
             },
             {
                 "id": 4,
-                "nombre_completo": "Alex Chinque",
+                "nombres": "Alex",
+                "apellidos": "Chinque",
                 "email": "alexchinke97@gmail.com",
                 "password": None,
                 "temp_password": "9c067f586228cecb9c8bc50de2b33eeb7a2c2c73d406441a87977109b631207d",
@@ -547,6 +519,8 @@ def seed_usuarios():
                 "token": "",
                 "token_date_end": None,
                 "id_rol": 4,
+                "activo": True,
+                "reg_activo": True,
                 "created_at": "2024-12-02 11:28:45",
                 "updated_at": "2024-12-02 11:32:10"
             },
@@ -555,7 +529,8 @@ def seed_usuarios():
         for usuario in usuarios:
             new_usuario = Usuario(
                 id=usuario["id"],
-                nombre_completo=usuario["nombre_completo"],
+                nombres=usuario["nombres"],
+                apellidos=usuario["apellidos"],
                 email=usuario["email"],
                 password=usuario["password"],
                 temp_password=usuario["temp_password"],
@@ -563,6 +538,8 @@ def seed_usuarios():
                 token=usuario["token"],
                 token_date_end=usuario["token_date_end"],
                 id_rol=usuario["id_rol"],
+                activo=usuario["activo"],
+                reg_activo=usuario["reg_activo"],
                 created_at=usuario["created_at"],
                 updated_at=usuario["updated_at"]
             )
@@ -570,6 +547,7 @@ def seed_usuarios():
 
         db.session.commit()
         print("Usuarios insertados exitosamente.")
+
 
 
 @seed_cli.command("all")
