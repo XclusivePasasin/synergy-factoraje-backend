@@ -220,6 +220,12 @@ su factura está disponible para aplicar a pronto pago.
 **Endpoint:** `GET /api/usuario/listar-usuarios`
 **Descripción:** Devuelve una lista de todos los usuarios que no han sido eliminados.
 
+**Query Parameters (Opcional):**
+- 'nombre': Filtrar por nombres.
+- 'apellidos': Filtrar por apellidos.
+- 'cargo': Filtrar por cargo.
+- 'email': Filtrar por email.
+
 **Headers:**
 ```json
 {
@@ -231,22 +237,33 @@ su factura está disponible para aplicar a pronto pago.
 {
     "code": 0,
     "data": {
+        "current_page": 1,
+        "per_page": 10,
+        "total_pages": 1,
         "usuarios": [
             {
-                "id": 1,
-                "nombres": "Marta",
-                "apellidos": "Lopez",
-                "email": "test@test.com",
+                "activo": true,
+                "apellidos": "",
                 "cargo": "Administrador",
-                "activo": true
+                "created_at": "2024-12-02T08:27:55",
+                "email": "clobitechadmin@clobitech.com",
+                "id": 1,
+                "id_rol": 1,
+                "nombres": "",
+                "reg_activo": true,
+                "updated_at": "2024-12-09T12:53:43"
             },
             {
-                "id": 2,
-                "nombres": "Juan",
-                "apellidos": "Moran",
-                "email": "test@test.com",
+                "activo": true,
+                "apellidos": "",
                 "cargo": "Agente Synergy",
-                "activo": false
+                "created_at": "2024-12-02T11:22:00",
+                "email": "sonia.navarro@clobitech.com",
+                "id": 2,
+                "id_rol": 2,
+                "nombres": "",
+                "reg_activo": true,
+                "updated_at": "2024-12-02T11:30:27"
             }
         ]
     },
@@ -713,5 +730,50 @@ su factura está disponible para aplicar a pronto pago.
         "total_solicitudes": 2
     },
     "message": "Métricas de solicitudes obtenidas con éxito"
+}
+```
+
+## Endpoints Permisos
+
+### **Actualizar Permisos**
+**Endpoint:** `PUT /api/permiso/actualizar-permisos`
+**Descripción:** Actualiza los permisos de un rol existente.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Request Body:**
+```json
+{
+    "id_rol": 1,
+    "permisos": [
+        {
+            "id_menu": 3,
+            "create_perm": 1,
+            "edit_perm": 1,
+            "delete_perm": 1,
+            "view_perm": 1
+        },
+        {
+            "id_menu": 2,
+            "create_perm": 1,
+            "edit_perm": 0,
+            "delete_perm": 0,
+            "view_perm": 0
+        }
+    ]
+}
+```
+
+**Response:**
+```json
+{
+    "code": 0,
+    "data": "Permisos asignados exitosamente para el rol 'Auditor Synergy'.",
+    "message": "Permisos asignados exitosamente."
 }
 ```
