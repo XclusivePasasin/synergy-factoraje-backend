@@ -777,3 +777,104 @@ su factura está disponible para aplicar a pronto pago.
     "message": "Permisos asignados exitosamente."
 }
 ```
+
+
+### **Listar Permisos de un Rol**
+**Endpoint:** `GET /api/permiso/listar-permisos`
+**Descripción:** Devuelve una lista de todos los permisos en base al id_rol proporcionado.
+
+**Query Parameters (Obligatorio):**
+- 'id_rol': ID del rol que se desea listar los permisos.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+**Response:**
+```json
+
+{
+    "code": 0,
+    "data": {
+        "descripcion": null,
+        "id_rol": 1,
+        "nombre": "Administrador",
+        "permisos": [
+            {
+                "create_perm": 0,
+                "delete_perm": 1,
+                "edit_perm": 1,
+                "id_menu": 1,
+                "view_perm": 1
+            },
+            {
+                "create_perm": 1,
+                "delete_perm": 1,
+                "edit_perm": 1,
+                "id_menu": 2,
+                "view_perm": 1
+            },
+            {
+                "create_perm": 1,
+                "delete_perm": 1,
+                "edit_perm": 1,
+                "id_menu": 3,
+                "view_perm": 1
+            },
+            {
+                "create_perm": 1,
+                "delete_perm": 1,
+                "edit_perm": 1,
+                "id_menu": 4,
+                "view_perm": 1
+            },
+            {
+                "create_perm": 1,
+                "delete_perm": 1,
+                "edit_perm": 1,
+                "id_menu": 5,
+                "view_perm": 1
+            },
+            {
+                "create_perm": 1,
+                "delete_perm": 1,
+                "edit_perm": 1,
+                "id_menu": 6,
+                "view_perm": 1
+            },
+            {
+                "create_perm": 1,
+                "delete_perm": 1,
+                "edit_perm": 1,
+                "id_menu": 7,
+                "view_perm": 1
+            },
+            {
+                "create_perm": 1,
+                "delete_perm": 1,
+                "edit_perm": 1,
+                "id_menu": 8,
+                "view_perm": 1
+            },
+            {
+                "create_perm": 1,
+                "delete_perm": 1,
+                "edit_perm": 1,
+                "id_menu": 9,
+                "view_perm": 1
+            },
+            {
+                "create_perm": 1,
+                "delete_perm": 1,
+                "edit_perm": 1,
+                "id_menu": 10,
+                "view_perm": 1
+            }
+        ]
+    },
+    "message": "Permisos obtenidos exitosamente."
+}
+
+```
