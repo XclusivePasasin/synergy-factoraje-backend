@@ -493,5 +493,57 @@ class UsuarioService:
             db.session.rollback()
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
         
+    @staticmethod
+    def restablecer_contraseña(usuario_id):
+        try:
+            usuario = Usuario.query.get(usuario_id)
+            if not usuario:
+                return response_error("Usuario no encontrado", http_status=404)
+
+            # Comprobar si el usuario está activo y no eliminado
+            if not usuario.activo or not usuario.reg_activo:
+                return response_error("No se puede restablecer la contraseña: el usuario está inactivo o eliminado", http_status=403)
+            
+            # Verificar si ya se ha restablecido la contraseña y el usuario aún no ha establecido una nueva
+            if usuario.password is None:
+                return response_error("Debes iniciar sesión y establecer una nueva contraseña antes de poder restablecerla nuevamente.", http_status=403)
+
+            # Generar una nueva contraseña temporal
+            temp_password = UsuarioService.generar_contraseña_temp()
+
+            # Hashear la contraseña temporal para guardarla de forma segura
+            salt = current_app.config['SALT_SECRET']
+            hashed_temp_password = hashlib.sha256((temp_password + salt).encode('utf-8')).hexdigest()
+            usuario.temp_password = hashed_temp_password
+
+            # Guardar los cambios en la base de datos
+            db.session.commit()
+
+            # Preparar y enviar el correo electrónico
+            parametro_nombre_empresa = Parametro.query.filter_by(clave='NOM-EMPRESA').first()
+            nombre_empresa = parametro_nombre_empresa.valor if parametro_nombre_empresa else "Desconocido"
+            
+            datos_credenciales = {
+                "nombreUsuario": f"{usuario.nombres} {usuario.apellidos}",
+                "correoElectronico": usuario.email,
+                "contrasenaTemporal": temp_password,
+                "nombreEmpresa": nombre_empresa,  
+            }
+            asunto = "Credenciales de acceso actualizadas"
+            contenido_html_credenciales = generar_plantilla('correo_restablecimiento_contraseña.html', datos_credenciales)
+            
+            # Función enviar_correo debe estar definida para manejar el envío de correos
+            enviar_correo(usuario.email, asunto, contenido_html_credenciales)
+
+            return response_success({"mensaje": "Contraseña restablecida exitosamente. Las nuevas credenciales han sido enviadas por correo electrónico."}, http_status=200)
+        
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+        except Exception as e:
+            db.session.rollback()
+            return response_error(f"Error al enviar el correo: {str(e)}", http_status=500)
+
+        
     
         

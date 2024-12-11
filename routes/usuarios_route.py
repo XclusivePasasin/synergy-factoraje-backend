@@ -136,12 +136,40 @@ def cambiar_estado_usuario_route():
 def listar_usuarios():
     """
     Endpoint para listar todos los usuarios que no han sido eliminados.
-    Se incluyen tanto usuarios activos como inactivos, pero no aquellos marcados como eliminados (reg_activo = False).
+    Incluye filtros opcionales y paginación.
     """
     try:
-        # Filtrar usuarios activos e inactivos pero no eliminados
-        usuarios = Usuario.query.filter(Usuario.reg_activo == True).all()  
-        usuarios_data = {
+        # Obtener parámetros de consulta para la paginación y filtros
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+        nombres = request.args.get('nombre', '')
+        apellidos = request.args.get('apellido', '')
+        email = request.args.get('email', '')
+        cargo = request.args.get('cargo', '')
+
+        # Construir el query base
+        query = Usuario.query.filter(Usuario.reg_activo == True)
+
+        # Aplicar filtros si se proporcionan
+        if nombres:
+            query = query.filter(Usuario.nombres.ilike(f"%{nombres}%"))
+        if apellidos:
+            query = query.filter(Usuario.apellidos.ilike(f"%{apellidos}%"))
+        if email:
+            query = query.filter(Usuario.email.ilike(f"%{email}%"))
+        if cargo:
+            query = query.filter(Usuario.cargo.ilike(f"%{cargo}%"))
+
+
+        # Paginación y conteo total después de filtrar
+        total_usuarios = query.count()
+        usuarios = query.offset((page - 1) * per_page).limit(per_page).all()
+
+        # Construir la respuesta con los usuarios
+        response_data = {
+            "current_page": page,
+            "per_page": per_page,
+            "total_pages": (total_usuarios + per_page - 1) // per_page,
             "usuarios": [
                 {
                     "id": usuario.id,
@@ -149,15 +177,20 @@ def listar_usuarios():
                     "apellidos": usuario.apellidos,
                     "email": usuario.email,
                     "cargo": usuario.cargo,
-                    "activo": usuario.activo
+                    "activo": usuario.activo,
+                    "id_rol": usuario.id_rol,
+                    "created_at": usuario.created_at.isoformat(),
+                    "updated_at": usuario.updated_at.isoformat(),
+                    "reg_activo": usuario.reg_activo,
                 }
                 for usuario in usuarios
             ]
         }
-        return response_success(usuarios_data, "Lista de usuarios obtenida exitosamente", http_status=200)
+
+        return response_success(response_data, "Lista de usuarios obtenida exitosamente")
     except Exception as e:
         return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
-
+    
 @usuarios_bp.route('/detalle-usuario', methods=['GET'])
 @token_required
 def detalle_usuario():
@@ -180,7 +213,11 @@ def detalle_usuario():
             "apellidos": usuario.apellidos,
             "email": usuario.email,
             "cargo": usuario.cargo,
+            "id_rol": usuario.id_rol,
+            "created_at": usuario.created_at,
+            "updated_at": usuario.updated_at,
             "activo": usuario.activo,
+            "reg_activo": usuario.reg_activo,
         }
         return response_success(usuario_data, "Detalle del usuario obtenido exitosamente", http_status=200)
     except Exception as e:
@@ -203,4 +240,23 @@ def eliminar_usuario_route():
 
     except Exception as e:
         return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+    
+@usuarios_bp.route('/restablecer-contraseña', methods=['POST'])
+@token_required
+def restablecer_contraseña():
+    """
+    Endpoint para restablecer la contraseña de un usuario obteniendo el id del usuario como query parameter.
+    """
+    try:
+        usuario_id = request.args.get('usuario_id', type=int)
+        if not usuario_id:
+            return response_error("El parámetro 'usuario_id' es obligatorio y debe ser un número entero.", http_status=400)
+        
+        # Llamada al servicio para restablecer la contraseña
+        return UsuarioService.restablecer_contraseña(usuario_id)
+    except Exception as e:
+        return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
+   
+
 
