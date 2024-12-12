@@ -19,7 +19,7 @@ class UsuarioService:
     def crear_usuario(data):
         try:
             # Validar los campos requeridos
-            campos_requeridos = ['nombres', 'apellidos', 'email', 'cargo', 'id_rol']
+            campos_requeridos = ['nombres', 'apellidos', 'email', 'id_rol']
             for campo in campos_requeridos:
                 if campo not in data:
                     return response_error(f"El campo {campo} es obligatorio", http_status=400)
@@ -27,9 +27,8 @@ class UsuarioService:
             nombres = data['nombres']
             apellidos = data['apellidos']
             email = data['email']
-            cargo = data['cargo']
             id_rol = data['id_rol']
-            
+
             if len(nombres) < 2 or len(nombres) > 50 or len(apellidos) < 2 or len(apellidos) > 50:
                 return response_error("El formato o longitud del nombre o apellidos no es válido", http_status=400)
 
@@ -42,6 +41,9 @@ class UsuarioService:
             if not rol:
                 return response_error("El rol especificado no existe", http_status=404)
 
+            # Asignar el cargo basado en el nombre del rol
+            cargo = rol.rol
+
             # Validar que el correo no esté registrado
             usuario_existente = Usuario.query.filter_by(email=email).first()
             if usuario_existente:
@@ -49,11 +51,11 @@ class UsuarioService:
 
             # Generar contraseña temporal
             # temp_password = UsuarioService.generar_contraseña_temp()
-            temp_password = '12345678'  
+            temp_password = '12345678'
             print('temp_password: ', temp_password)
 
             # Hashear la contraseña temporal usando hashlib con SHA-256
-            salt = current_app.config['SALT_SECRET'] 
+            salt = current_app.config['SALT_SECRET']
             hashed_temp_password = hashlib.sha256((temp_password + salt).encode('utf-8')).hexdigest()
 
             # Crear el nuevo usuario
@@ -79,18 +81,16 @@ class UsuarioService:
 
             # Enviar correo con las credenciales al usuario
             datos_credenciales = {
-                "nombreUsuario": nombres + ' ' + apellidos,
+                "nombreUsuario": f"{nombres} {apellidos}",
                 "correoElectronico": email,
                 "contrasenaTemporal": temp_password,
-                "nombreEmpresa": nombre_empresa,  
+                "nombreEmpresa": nombre_empresa,
             }
-            asunto = f"Credenciales de acceso al sistema de pronto pago"
+            asunto = "Credenciales de acceso al sistema de pronto pago"
             contenido_html_credenciales = generar_plantilla('correo_contraseña_temporal.html', datos_credenciales)
-
             # Enviar el correo
             enviar_correo(email, asunto, contenido_html_credenciales)
 
-            # Retornar detalles del usuario creado (sin incluir contraseñas)
             respuesta = {
                 "usuario_id": nuevo_usuario.id,
                 "nombres": nuevo_usuario.nombres,
@@ -100,9 +100,11 @@ class UsuarioService:
                 "id_rol": nuevo_usuario.id_rol
             }
             return response_success(respuesta, "Usuario creado exitosamente. Las credenciales han sido enviadas al correo registrado.", http_status=201)
+
         except Exception as e:
             db.session.rollback()
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
 
         
     @staticmethod
@@ -421,28 +423,27 @@ class UsuarioService:
             if not usuario:
                 return response_error("Usuario no encontrado", http_status=404)
 
+            # Actualizar nombres
             if 'nombres' in data and data['nombres'].strip():
                 usuario.nombres = data['nombres'].strip()
             else:
                 return response_error("El campo 'nombres' está vacío o no es válido", http_status=400)
 
+            # Actualizar apellidos
             if 'apellidos' in data and data['apellidos'].strip():
                 usuario.apellidos = data['apellidos'].strip()
             else:
                 return response_error("El campo 'apellidos' está vacío o no es válido", http_status=400)
 
+            # Actualizar rol y cargo basado en el rol
             if 'id_rol' in data and data['id_rol']:
                 rol = Rol.query.get(data['id_rol'])
                 if not rol:
                     return response_error("Rol no encontrado", http_status=404)
-                usuario.rol = rol
+                usuario.id_rol = data['id_rol']
+                usuario.cargo = rol.nombre  # Asignar cargo basado en el nombre del rol
             else:
                 return response_error("El campo 'id_rol' está vacío o no es válido", http_status=400)
-
-            if 'cargo' in data and data['cargo'].strip():
-                usuario.cargo = data['cargo'].strip()
-            else:
-                return response_error("El campo 'cargo' está vacío o no es válido", http_status=400)
 
             # Actualización de la contraseña si se proporciona
             if 'password' in data:
@@ -450,16 +451,18 @@ class UsuarioService:
                     salt = current_app.config['SALT_SECRET']
                     hashed_password = hashlib.sha256((data['password'] + salt).encode('utf-8')).hexdigest()
                     usuario.password = hashed_password
-                elif data['password']:  
+                elif data['password']:
                     return response_error("La contraseña debe tener al menos 8 caracteres.", http_status=400)
-            
+
+            # Guardar los cambios en la base de datos
             db.session.commit()
             return response_success({"mensaje": "Usuario actualizado exitosamente"}, http_status=200)
 
         except SQLAlchemyError as e:
             db.session.rollback()
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
-        
+
+    
     @staticmethod
     def cambiar_estado_usuario(usuario_id, activo):
         try:

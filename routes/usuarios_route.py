@@ -216,8 +216,8 @@ def detalle_usuario():
             "id_rol": usuario.id_rol,
             "created_at": usuario.created_at,
             "updated_at": usuario.updated_at,
-            "activo": usuario.activo,
-            "reg_activo": usuario.reg_activo,
+            "activo": 1 if usuario.activo else 0,
+            "reg_activo": 1 if usuario.reg_activo else 0,
         }
         return response_success(usuario_data, "Detalle del usuario obtenido exitosamente", http_status=200)
     except Exception as e:

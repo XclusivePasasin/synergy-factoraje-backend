@@ -116,7 +116,6 @@ su factura está disponible para aplicar a pronto pago.
     "nombres": "Julian",
     "apellidos": "Zan",
     "email": "julian.zan4@example.com",
-    "cargo": "Gerente",
     "id_rol": 1
 }
 
@@ -189,11 +188,10 @@ su factura está disponible para aplicar a pronto pago.
 **Request Body:**
 ```json
 {
-    "nombres": "Juan Antonio",
-    "apellidos": "Pasasin",
-    "id_rol": 1,
-    "cargo": "Director",
-    "password": "12345678"
+    "nombres": "Luissss",
+    "apellidos": "Majanoo",
+    "id_rol": 4,
+    "password": "" // Opcional
 }
 ```
 
@@ -290,12 +288,16 @@ su factura está disponible para aplicar a pronto pago.
 {
     "code": 0,
     "data": {
-        "id": 1,
+        "activo": 1,
+        "apellidos": "Navarro",
+        "cargo": "Agente Synergy",
+        "created_at": "Mon, 02 Dec 2024 11:22:00 GMT",
+        "email": "sonia.navarro@clobitech.com",
+        "id": 2,
+        "id_rol": 2,
         "nombres": "Sonia",
-        "apellidos": "Adame",
-        "email": "test@test.com",
-        "cargo": "Administrador",
-        "activo": true
+        "reg_activo": 1,
+        "updated_at": "Mon, 02 Dec 2024 11:30:27 GMT"
     },
     "message": "Detalle del usuario obtenido exitosamente"
 }
