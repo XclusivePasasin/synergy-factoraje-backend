@@ -159,14 +159,11 @@ class UsuarioService:
             permisos_data = []
             for permiso in permisos:
                 menu = Menu.query.get(permiso.id_menu)
-                permisos_data.append({
-                    "create_perm": 1 if permiso.create_perm else 0, 
-                    "edit_perm": 1 if permiso.edit_perm else 0,     
-                    "delete_perm": 1 if permiso.delete_perm else 0,  
-                    "view_perm": 1 if permiso.view_perm else 0,     
+                permisos_data.append({ 
                     "menu": {
                         "id": menu.id,
                         "menu": menu.menu,
+                        "descripcion": menu.description,
                         "path": menu.path,
                         "icon": menu.icon,
                         "orden": menu.orden,

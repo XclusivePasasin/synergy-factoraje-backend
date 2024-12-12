@@ -17,8 +17,8 @@ def actualizar_permisos():
         if not data:
             return response_error("Datos no proporcionados", http_status=400)
 
-        if 'id_rol' not in data or 'permisos' not in data:
-            return response_error("El payload debe contener 'id_rol' y 'permisos'.", http_status=400)
+        if 'id_rol' not in data or 'menus' not in data:
+            return response_error("El payload debe contener 'id_rol' y 'menus'.", http_status=400)
 
         return PermisosService.actualizar_permisos(data)
 
@@ -40,3 +40,21 @@ def listar_permisos():
 
     except Exception as e:
         return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
+@permisos_bp.route('/listar-menus', methods=['GET'])
+@token_required
+def listar_menus():
+    try:
+        return PermisosService.obtener_todos_menus()
+
+    except Exception as e:
+        return response_error(f"Error interno del servidor: {str(e)}", http_status=500) 
+
+@permisos_bp.route('/listar-roles', methods=['GET'])
+@token_required
+def listar_roles():
+    try:
+        return PermisosService.obtener_todos_los_roles()
+
+    except Exception as e:
+        return response_error(f"Error interno del servidor: {str(e)}", http_status=500)        
