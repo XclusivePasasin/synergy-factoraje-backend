@@ -186,6 +186,7 @@ class UsuarioService:
                 "apellidos": usuario_encontrado.apellidos,
                 "email": usuario_encontrado.email,
                 "role": rol.rol if rol else "Sin rol asignado",
+                "id_role": rol.id if rol else "Sin id rol asignado",
                 "permissions": permisos_data, 
             }
 
