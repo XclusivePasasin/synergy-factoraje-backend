@@ -15,5 +15,5 @@ class Usuario(db.Model):
     rol = db.relationship('Rol', backref='usuarios')
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
-    activo = db.Column(db.Boolean, default=False, nullable=False)  
-    reg_activo = db.Column(db.Boolean, default=False, nullable=False)  
+    activo = db.Column(db.Boolean, default=True, nullable=False)  
+    reg_activo = db.Column(db.Boolean, default=True, nullable=False)  
