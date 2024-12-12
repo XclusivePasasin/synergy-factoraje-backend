@@ -298,142 +298,48 @@ from utils.db import db
 
 @seed_cli.command('menus')
 def seed_menus():
-    """Seed de menus"""
-    with current_app.app_context():
-        menus = [
-            {
-                "id": 1,
-                "menu": "Panel",
-                "description": "Este menu muestra la informacion como acceso directo",
-                "path": "/home",
-                "icon": "pi pi-chart-line",
-                "padre": 0,
-                "orden": 1,
-            },
-            {
-                "id": 2,
-                "menu": "Solicitudes",
-                "description": "Este menu muestra las solicitudes que estan pendientes",
-                "path": "/solicitudes",
-                "icon": "pi pi-chart-bar",
-                "padre": 0,
-                "orden": 2,
-            },
-            {
-                "id": 3,
-                "menu": "Aprobadas",
-                "description": None,
-                "path": "/solicitudes/aprobadas",
-                "icon": "pi pi-check-circle",
-                "padre": 2,
-                "orden": 2,
-            },
-            {
-                "id": 4,
-                "menu": "Sin Aprobar",
-                "description": None,
-                "path": "/solicitudes/sin-aprobar",
-                "icon": "pi pi-hourglass",
-                "padre": 2,
-                "orden": 2,
-            },
-            {
-                "id": 5,
-                "menu": "Desembolso",
-                "description": None,
-                "path": "/desembolsos",
-                "icon": "pi pi-shopping-bag",
-                "padre": 0,
-                "orden": 3,
-            },
-            {
-                "id": 6,
-                "menu": "Procesadas",
-                "description": None,
-                "path": "/desembolsos/procesadas",
-                "icon": "pi-chart-bar",
-                "padre": 3,
-                "orden": 3,
-            },
-            {
-                "id": 7,
-                "menu": "Ajustes",
-                "description": None,
-                "path": "/ajustes",
-                "icon": "pi pi-sliders-h",
-                "padre": 0,
-                "orden": 4,
-            },
-            {
-                "id": 8,
-                "menu": "Administracion",
-                "description": None,
-                "path": "/administracion",
-                "icon": "pi pi-users",
-                "padre": 0,
-                "orden": 5,
-            },
-            {
-                "id": 9,
-                "menu": "Reportes",
-                "description": None,
-                "path": "/reportes",
-                "icon": "pi pi-warehouse",
-                "padre": 0,
-                "orden": 6,
-            },
-            {
-                "id": 10,
-                "menu": "Bitacoras",
-                "description": None,
-                "path": "/reportes/bitacoras",
-                "icon": "pi-chart-bar",
-                "padre": 6,
-                "orden": 6.1,
-            },
-            {
-                "id": 11,
-                "menu": "Solicitar Pronto Pago",
-                "description": None,
-                "path": "/solicitar-pronto-pago",
-                "icon": "pi-chart-bar",
-                "padre": 0,
-                "orden": 7,
-            },
-            {
-                "id": 12,
-                "menu": "Usuarios",
-                "description": None,
-                "path": "/admin/usuarios",
-                "icon": "pi pi-users",
-                "padre": 8,
-                "orden": 5.1,
-            },
-            {
-                "id": 13,
-                "menu": "Roles y permisos",
-                "description": None,
-                "path": "/admin/roles-permisos",
-                "icon": "pi pi-shield",
-                "padre": 8,
-                "orden": 5.2,
-            },
-        ]
+    menus = [
+        Menu(id=1, menu='Panel', description='MENU', path='/home', icon='pi pi-chart-line', orden=1, padre=0),
+        Menu(id=3, menu='Solicitudes', description='MENU', path='/solicitudes', icon='pi pi-chart-bar', orden=2, padre=0),
+        Menu(id=4, menu='Aprobadas', description='SUBMENU', path='/solicitudes/aprobadas', icon='pi pi-check-circle', orden=2.1, padre=3),
+        Menu(id=5, menu='Sin aprobar', description='SUBMENU', path='/solicitudes/sin-aprobar', icon='pi pi-hourglass', orden=2.2, padre=3),
+        Menu(id=6, menu='Aprobar o denegar', description='ACCION', path=None, icon='', orden=2.3, padre=3),
+        Menu(id=7, menu='Desembolso', description='MENU', path='/desembolso', icon='pi pi-shopping-bag', orden=3, padre=0),
+        Menu(id=8, menu='Sin procesar', description='SUBMENU', path='/desembolso/sin-procesar', icon='pi pi-shopping-bag', orden=3.1, padre=7),
+        Menu(id=9, menu='Procesadas', description='SUBMENU', path='/desembolso/procesadas', icon='pi pi-shopping-bag', orden=3.2, padre=7),
+        Menu(id=10, menu='Descargar CSV', description='ACCION', path=None, icon=None, orden=3.3, padre=7),
+        Menu(id=11, menu='Procesar', description='ACCION', path='', icon=None, orden=3.4, padre=7),
+        Menu(id=12, menu='Ver PDF', description='ACCION', path=None, icon=None, orden=3.5, padre=7),
+        Menu(id=13, menu='Ajustes', description='MENU', path='/ajustes', icon='pi pi-sliders-h', orden=4, padre=0),
+        Menu(id=14, menu='Administracion', description='MENU', path='/admin', icon='pi pi-users', orden=5, padre=0),
+        Menu(id=15, menu='Usuarios', description='SUBMENU', path='/admin/usuarios', icon='pi pi-users', orden=5.1, padre=14),
+        Menu(id=16, menu='Crear usuario', description='ACCION', path='', icon=None, orden=5.2, padre=14),
+        Menu(id=17, menu='Editar usuario', description='ACCION', path=None, icon=None, orden=5.3, padre=14),
+        Menu(id=18, menu='Eliminar usuario', description='ACCION', path='', icon=None, orden=5.4, padre=14),
+        Menu(id=19, menu='Activar o Inactivar usuario', description='ACCION', path=None, icon=None, orden=5.5, padre=14),
+        Menu(id=20, menu='Roles y permisos', description='SUBMENU', path='/admin/roles-permisos', icon='pi pi-shield', orden=6, padre=14),
+        Menu(id=21, menu='Crear rol', description='ACCION', path=None, icon=None, orden=6.1, padre=20),
+        Menu(id=22, menu='Editar rol', description='ACCION', path='', icon=None, orden=6.2, padre=20),
+        Menu(id=23, menu='Eliminar rol', description='ACCION', path='', icon=None, orden=6.3, padre=20),
+        Menu(id=24, menu='Reportes', description='MENU', path='/reportes', icon='pi pi-warehouse', orden=7, padre=0),
+        Menu(id=25, menu='Solicitudes', description='SUBMENU', path='/reportes/solicitudes', icon='pi pi-warehouse', orden=7.1, padre=24),
+        Menu(id=26, menu='Descargar PDF o Excel', description='ACCION', path=None, icon=None, orden=7.2, padre=25),
+        Menu(id=27, menu='Desembolsos', description='SUBMENU', path='/reportes/desembolsos', icon='pi pi-warehouse', orden=7.2, padre=24),
+        Menu(id=28, menu='Descargar PDF o Excel', description='ACCION', path=None, icon=None, orden=None, padre=26),
+        Menu(id=29, menu='Bitácoras', description='SUBMENU', path='/reportes/bitacoras', icon='pi pi-warehouse', orden=7.3, padre=24),
+        Menu(id=30, menu='Descargar PDF o Excel', description='ACCION', path=None, icon=None, orden=None, padre=None),
+        Menu(id=31, menu='Ver detalle de solicitud', description='ACCION', path='', icon='', orden=2.4, padre=3),
+        Menu(id=32, menu='Ver detalle de desembolso', description='ACCION', path='', icon=None, orden=3.6, padre=7),
+        Menu(id=33, menu='Ver aprobadas', description='ACCION', path=None, icon=None, orden=2.5, padre=4),
+        Menu(id=34, menu='Ver sin aprobar', description='ACCION', path=None, icon=None, orden=2.6, padre=5),
+        Menu(id=35, menu='Ver reportes de solicitudes', description='ACCION', path=None, icon=None, orden=7.3, padre=24),
+        Menu(id=36, menu='Ver reportes de desembolsos', description='ACCION', path=None, icon=None, orden=7.4, padre=24),
+        Menu(id=37, menu='Ver reportes de bitacoras', description='ACCION', path=None, icon=None, orden=7.5, padre=24),
+    ]
 
-        for menu in menus:
-            new_menu = Menu(
-                id=menu["id"],
-                menu=menu["menu"],
-                description=menu["description"],
-                path=menu["path"],
-                icon=menu["icon"],
-                orden=menu["orden"],
-                padre=menu["padre"],
-            )
-            db.session.add(new_menu)
-        
-        db.session.commit()
-        print("Menús insertados exitosamente.")
+    db.session.bulk_save_objects(menus)
+    db.session.commit()
+    print("Seed ejecutada exitosamente.")
         
 @seed_cli.command('permisos')
 def seed_permisos():
