@@ -516,6 +516,7 @@ class UsuarioService:
             salt = current_app.config['SALT_SECRET']
             hashed_temp_password = hashlib.sha256((temp_password + salt).encode('utf-8')).hexdigest()
             usuario.temp_password = hashed_temp_password
+            usuario.password = None
 
             # Guardar los cambios en la base de datos
             db.session.commit()
