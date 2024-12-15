@@ -300,41 +300,27 @@ from utils.db import db
 def seed_menus():
     menus = [
         Menu(id=1, menu='Panel', description='MENU', path='/home', icon='pi pi-chart-line', orden=1, padre=0),
-        Menu(id=3, menu='Solicitudes', description='MENU', path='/solicitudes', icon='pi pi-chart-bar', orden=2, padre=0),
-        Menu(id=4, menu='Aprobadas', description='SUBMENU', path='/solicitudes/aprobadas', icon='pi pi-check-circle', orden=2.1, padre=3),
-        Menu(id=5, menu='Sin aprobar', description='SUBMENU', path='/solicitudes/sin-aprobar', icon='pi pi-hourglass', orden=2.2, padre=3),
-        Menu(id=6, menu='Aprobar o denegar', description='ACCION', path=None, icon='', orden=2.3, padre=3),
-        Menu(id=7, menu='Desembolso', description='MENU', path='/desembolso', icon='pi pi-shopping-bag', orden=3, padre=0),
-        Menu(id=8, menu='Sin procesar', description='SUBMENU', path='/desembolso/sin-procesar', icon='pi pi-shopping-bag', orden=3.1, padre=7),
-        Menu(id=9, menu='Procesadas', description='SUBMENU', path='/desembolso/procesadas', icon='pi pi-shopping-bag', orden=3.2, padre=7),
-        Menu(id=10, menu='Descargar CSV', description='ACCION', path=None, icon=None, orden=3.3, padre=7),
-        Menu(id=11, menu='Procesar', description='ACCION', path='', icon=None, orden=3.4, padre=7),
-        Menu(id=12, menu='Ver PDF', description='ACCION', path=None, icon=None, orden=3.5, padre=7),
-        Menu(id=13, menu='Ajustes', description='MENU', path='/ajustes', icon='pi pi-sliders-h', orden=4, padre=0),
-        Menu(id=14, menu='Administracion', description='MENU', path='/admin', icon='pi pi-users', orden=5, padre=0),
-        Menu(id=15, menu='Usuarios', description='SUBMENU', path='/admin/usuarios', icon='pi pi-users', orden=5.1, padre=14),
-        Menu(id=16, menu='Crear usuario', description='ACCION', path='', icon=None, orden=5.2, padre=14),
-        Menu(id=17, menu='Editar usuario', description='ACCION', path=None, icon=None, orden=5.3, padre=14),
-        Menu(id=18, menu='Eliminar usuario', description='ACCION', path='', icon=None, orden=5.4, padre=14),
-        Menu(id=19, menu='Activar o Inactivar usuario', description='ACCION', path=None, icon=None, orden=5.5, padre=14),
-        Menu(id=20, menu='Roles y permisos', description='SUBMENU', path='/admin/roles-permisos', icon='pi pi-shield', orden=6, padre=14),
-        Menu(id=21, menu='Crear rol', description='ACCION', path=None, icon=None, orden=6.1, padre=20),
-        Menu(id=22, menu='Editar rol', description='ACCION', path='', icon=None, orden=6.2, padre=20),
-        Menu(id=23, menu='Eliminar rol', description='ACCION', path='', icon=None, orden=6.3, padre=20),
-        Menu(id=24, menu='Reportes', description='MENU', path='/reportes', icon='pi pi-warehouse', orden=7, padre=0),
-        Menu(id=25, menu='Solicitudes', description='SUBMENU', path='/reportes/solicitudes', icon='pi pi-warehouse', orden=7.1, padre=24),
-        Menu(id=26, menu='Descargar PDF o Excel', description='ACCION', path=None, icon=None, orden=7.2, padre=25),
-        Menu(id=27, menu='Desembolsos', description='SUBMENU', path='/reportes/desembolsos', icon='pi pi-warehouse', orden=7.2, padre=24),
-        Menu(id=28, menu='Descargar PDF o Excel', description='ACCION', path=None, icon=None, orden=None, padre=26),
-        Menu(id=29, menu='Bitácoras', description='SUBMENU', path='/reportes/bitacoras', icon='pi pi-warehouse', orden=7.3, padre=24),
-        Menu(id=30, menu='Descargar PDF o Excel', description='ACCION', path=None, icon=None, orden=None, padre=None),
-        Menu(id=31, menu='Ver detalle de solicitud', description='ACCION', path='', icon='', orden=2.4, padre=3),
-        Menu(id=32, menu='Ver detalle de desembolso', description='ACCION', path='', icon=None, orden=3.6, padre=7),
-        Menu(id=33, menu='Ver aprobadas', description='ACCION', path=None, icon=None, orden=2.5, padre=4),
-        Menu(id=34, menu='Ver sin aprobar', description='ACCION', path=None, icon=None, orden=2.6, padre=5),
-        Menu(id=35, menu='Ver reportes de solicitudes', description='ACCION', path=None, icon=None, orden=7.3, padre=24),
-        Menu(id=36, menu='Ver reportes de desembolsos', description='ACCION', path=None, icon=None, orden=7.4, padre=24),
-        Menu(id=37, menu='Ver reportes de bitacoras', description='ACCION', path=None, icon=None, orden=7.5, padre=24),
+        Menu(id=2, menu='Solicitudes', description='MENU', path='/solicitudes', icon='pi pi-chart-bar', orden=2, padre=0),
+        Menu(id=3, menu='Aprobadas', description='SUBMENU', path='/solicitudes/aprobadas', icon='pi pi-check-circle', orden=2.1, padre=2),
+        Menu(id=4, menu='Sin aprobar', description='SUBMENU', path='/solicitudes/sin-aprobar', icon='pi pi-hourglass', orden=2.2, padre=2),
+        Menu(id=5, menu='Desembolso', description='MENU', path='/desembolso', icon='pi pi-shopping-bag', orden=3, padre=0),
+        Menu(id=6, menu='Sin procesar', description='SUBMENU', path='/desembolso/sin-procesar', icon='pi pi-shopping-bag', orden=3.1, padre=5),
+        Menu(id=7, menu='Procesadas', description='SUBMENU', path='/desembolso/procesadas', icon='pi pi-shopping-bag', orden=3.2, padre=5),
+        Menu(id=8, menu='Ajustes', description='MENU', path='/ajustes', icon='pi pi-sliders-h', orden=4, padre=0),
+        Menu(id=9, menu='Administracion', description='MENU', path='/admin', icon='pi pi-users', orden=5, padre=0),
+        Menu(id=10, menu='Usuarios', description='SUBMENU', path='/admin/usuarios', icon='pi pi-users', orden=5.1, padre=9),
+        Menu(id=11, menu='Roles y permisos', description='SUBMENU', path='/admin/roles-permisos', icon='pi pi-shield', orden=6, padre=9),
+        Menu(id=12, menu='Reportes', description='MENU', path='/reportes', icon='pi pi-warehouse', orden=7, padre=0),
+        Menu(id=13, menu='Solicitudes', description='SUBMENU', path='/reportes/solicitudes', icon='pi pi-warehouse', orden=7.1, padre=12),
+        Menu(id=14, menu='Desembolsos', description='SUBMENU', path='/reportes/desembolsos', icon='pi pi-warehouse', orden=7.2, padre=12),
+        Menu(id=15, menu='Bitácoras', description='SUBMENU', path='/reportes/bitacoras', icon='pi pi-warehouse', orden=7.3, padre=12),
+        Menu(id=16, menu='Ver detalle de solicitud', description='DETALLE', path='/solicitudes/detalle', icon=None, orden=None, padre=2),
+        Menu(id=17, menu='Editar rol', description='DETALLE', path='/admin/roles-permisos/editar', icon=None, orden=None, padre=11),
+        Menu(id=18, menu='Crear rol', description='DETALLE', path='/admin/roles-permisos/nuevo', icon=None, orden=None, padre=11),
+        Menu(id=19, menu='Editar usuario', description='DETALLE', path='/admin/usuarios/editar', icon=None, orden=None, padre=10),
+        Menu(id=20, menu='Crear usuario', description='DETALLE', path='/admin/usuarios/crear', icon=None, orden=None, padre=10),
+        Menu(id=21, menu='Ver aprobadas', description='ACCION', path=None, icon=None, orden=None, padre=3),
+        Menu(id=22, menu='Descargar PDF', description='ACCION', path=None, icon=None, orden=None, padre=3),
     ]
 
     db.session.bulk_save_objects(menus)
@@ -346,48 +332,65 @@ def seed_permisos():
     """Seed de permisos"""
     with current_app.app_context():
         permisos = [
-            {"id": 1, "id_rol": 1, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
-            {"id": 2, "id_rol": 1, "id_menu": 2, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
-            {"id": 3, "id_rol": 1, "id_menu": 3, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
-            {"id": 4, "id_rol": 1, "id_menu": 4, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
-            {"id": 5, "id_rol": 1, "id_menu": 5, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
-            {"id": 6, "id_rol": 1, "id_menu": 6, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
-            {"id": 7, "id_rol": 1, "id_menu": 7, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
-            {"id": 8, "id_rol": 1, "id_menu": 8, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
-            {"id": 9, "id_rol": 1, "id_menu": 9, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
-            {"id": 10, "id_rol": 1, "id_menu": 10, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": True, "download": True, "process": True, "edit_user": True, "create_user": True, "active_inactive_user": True, "edit_role": True, "create_role": True},
+            # Permisos para id_rol = 1
+            {"id": 1, "id_rol": 1, "id_menu": 1},
+            {"id": 2, "id_rol": 1, "id_menu": 2},
+            {"id": 3, "id_rol": 1, "id_menu": 5},
+            {"id": 4, "id_rol": 1, "id_menu": 8},
+            {"id": 5, "id_rol": 1, "id_menu": 9},
+            {"id": 6, "id_rol": 1, "id_menu": 10},
+            {"id": 7, "id_rol": 1, "id_menu": 11},
+            {"id": 8, "id_rol": 1, "id_menu": 12},
+            {"id": 9, "id_rol": 1, "id_menu": 13},
+            {"id": 10, "id_rol": 1, "id_menu": 14},
+            {"id": 11, "id_rol": 1, "id_menu": 15},
+            {"id": 12, "id_rol": 1, "id_menu": 16},
+            {"id": 13, "id_rol": 1, "id_menu": 17},
+            {"id": 14, "id_rol": 1, "id_menu": 18},
+            {"id": 15, "id_rol": 1, "id_menu": 19},
+            {"id": 16, "id_rol": 1, "id_menu": 20},
+            {"id": 17, "id_rol": 1, "id_menu": 21},
+            {"id": 18, "id_rol": 1, "id_menu": 22},
 
-            {"id": 11, "id_rol": 2, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
-            {"id": 12, "id_rol": 2, "id_menu": 2, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
-            {"id": 13, "id_rol": 2, "id_menu": 3, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
-            {"id": 14, "id_rol": 2, "id_menu": 4, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
-            {"id": 15, "id_rol": 2, "id_menu": 5, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
-            {"id": 16, "id_rol": 2, "id_menu": 6, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
-            
+            # Permisos para id_rol = 2
+            {"id": 19, "id_rol": 2, "id_menu": 1},
+            {"id": 20, "id_rol": 2, "id_menu": 2},
+            {"id": 21, "id_rol": 2, "id_menu": 3},
+            {"id": 22, "id_rol": 2, "id_menu": 4},
+            {"id": 23, "id_rol": 2, "id_menu": 5},
+            {"id": 24, "id_rol": 2, "id_menu": 6},
+            {"id": 25, "id_rol": 2, "id_menu": 7},
+            {"id": 26, "id_rol": 2, "id_menu": 12},
+            {"id": 27, "id_rol": 2, "id_menu": 13},
+            {"id": 28, "id_rol": 2, "id_menu": 14},
+            {"id": 29, "id_rol": 2, "id_menu": 16},
 
-            {"id": 17, "id_rol": 3, "id_menu": 1, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
-            {"id": 18, "id_rol": 3, "id_menu": 9, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
-            {"id": 19, "id_rol": 3, "id_menu": 10, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False},
+            # Permisos para id_rol = 3
+            {"id": 30, "id_rol": 3, "id_menu": 1},
+            {"id": 31, "id_rol": 3, "id_menu": 2},
+            {"id": 32, "id_rol": 3, "id_menu": 3},
+            {"id": 33, "id_rol": 3, "id_menu": 4},
+            {"id": 34, "id_rol": 3, "id_menu": 5},
+            {"id": 35, "id_rol": 3, "id_menu": 6},
+            {"id": 36, "id_rol": 3, "id_menu": 7},
+            {"id": 37, "id_rol": 3, "id_menu": 16},
 
-            {"id": 20, "id_rol": 4, "id_menu": 11, "create_perm": True, "edit_perm": True, "delete_perm": True, "view_perm": True, "approve_deny": False, "download": False, "process": False, "edit_user": False, "create_user": False, "active_inactive_user": False, "edit_role": False, "create_role": False}
+            # Permisos para id_rol = 4
+            {"id": 38, "id_rol": 4, "id_menu": 1},
+            {"id": 39, "id_rol": 4, "id_menu": 12},
+            {"id": 40, "id_rol": 4, "id_menu": 15},
         ]
-
 
         for permiso in permisos:
             new_permiso = Permiso(
                 id=permiso["id"],
                 id_rol=permiso["id_rol"],
-                id_menu=permiso["id_menu"],
-                create_perm=permiso["create_perm"],
-                edit_perm=permiso["edit_perm"],
-                delete_perm=permiso["delete_perm"],
-                view_perm=permiso["view_perm"]
+                id_menu=permiso["id_menu"]
             )
             db.session.add(new_permiso)
 
         db.session.commit()
         print("Permisos insertados exitosamente.")
-
 
 @seed_cli.command('usuarios')
 def seed_usuarios():
