@@ -17,3 +17,6 @@ class Usuario(db.Model):
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
     activo = db.Column(db.Boolean, default=True, nullable=False)  
     reg_activo = db.Column(db.Boolean, default=True, nullable=False)  
+    
+    # Relación con el modelo Rol
+    rol = db.relationship('Rol', backref='usuarios', lazy='joined')

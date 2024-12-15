@@ -2,6 +2,8 @@ from utils.db import db
 from models.permisos import Permiso
 from models.roles import Rol
 from models.menus import Menu
+from models.usuarios import Usuario
+from flask import request
 from utils.response import response_success, response_error
 
 class PermisosService:
@@ -104,7 +106,7 @@ class PermisosService:
     @staticmethod
     def obtener_todos_los_roles():
         # Obtener todos los roles de la base de datos
-        roles = Rol.query.all()
+        roles = Rol.query.filter(Rol.id != 5).all()
 
         if not roles:
             return response_error("No se encontraron roles.", http_status=404)
@@ -124,6 +126,50 @@ class PermisosService:
         }
 
         return response_success(response_data, "Roles obtenidos exitosamente.")
+    
+    @staticmethod
+    def eliminar_rol(rol_id):
+        """
+        Endpoint para eliminar un rol.
+        Recibe el rol_id como query parameter.
+        """
+        try:
+            rol_id = request.args.get('rol_id', type=int)
+            if not rol_id:
+                return response_error("El parámetro 'rol_id' es obligatorio y debe ser un entero válido.", http_status=400)
+
+            # Lista de roles que no se pueden eliminar
+            roles_protegidos = ["Administrador", "Operador de ICC", "Operador de Synergy", "Auditor"]
+
+            # Buscar el rol en la base de datos
+            rol = Rol.query.get(rol_id)
+            if not rol:
+                return response_error("El rol especificado no existe.", http_status=404)
+
+            if rol.nombre in roles_protegidos:
+                return response_error(
+                    f"El rol '{rol.nombre}' no se puede eliminar porque es un rol predeterminado.",
+                    http_status=400
+                )
+
+            # Verificar si existen usuarios asociados con el rol
+            usuarios_asociados = Usuario.query.filter_by(id_rol=rol_id).count()
+
+            if usuarios_asociados > 0:
+                return response_error(
+                    "No se puede eliminar el rol porque hay usuarios asociados a este rol.",
+                    http_status=400
+                )
+
+            # Eliminar el rol
+            db.session.delete(rol)
+            db.session.commit()
+
+            return response_success(None, "Rol eliminado exitosamente.")
+
+        except Exception as e:
+            return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
 
 
     @staticmethod

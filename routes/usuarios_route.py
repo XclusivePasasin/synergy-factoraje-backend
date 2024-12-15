@@ -148,7 +148,7 @@ def listar_usuarios():
         cargo = request.args.get('cargo', '')
 
         # Construir el query base
-        query = Usuario.query.filter(Usuario.reg_activo == True)
+        query = Usuario.query.filter(Usuario.reg_activo == True, Usuario.id != 4)  # Excluir el usuario con id = 4 (solicitador)
 
         # Aplicar filtros si se proporcionan
         if nombres:
@@ -176,7 +176,7 @@ def listar_usuarios():
                     "nombres": usuario.nombres,
                     "apellidos": usuario.apellidos,
                     "email": usuario.email,
-                    "cargo": usuario.cargo,
+                    "cargo": usuario.rol.nombre,
                     "activo": usuario.activo,
                     "id_rol": usuario.id_rol,
                     "created_at": usuario.created_at.isoformat(),

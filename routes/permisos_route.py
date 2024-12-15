@@ -57,4 +57,17 @@ def listar_roles():
         return PermisosService.obtener_todos_los_roles()
 
     except Exception as e:
+        return response_error(f"Error interno del servidor: {str(e)}", http_status=500)   
+
+@permisos_bp.route('/eliminar-rol', methods=['DELETE'])
+@token_required
+def eliminar_rol():
+    try:
+        rol_id = request.args.get('rol_id', type=int)
+        if not rol_id:
+            return response_error("El parámetro 'rol_id' es obligatorio y debe ser un entero válido.", http_status=400)
+        
+        return PermisosService.eliminar_rol(rol_id)
+
+    except Exception as e:
         return response_error(f"Error interno del servidor: {str(e)}", http_status=500)        
