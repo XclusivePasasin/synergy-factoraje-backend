@@ -469,6 +469,9 @@ class UsuarioService:
             usuario = Usuario.query.get(usuario_id)
             if not usuario:
                 return response_error("Usuario no encontrado", http_status=404)
+            # Validación para evitar modificar el estado de un usuario con id_rol = 1
+            if usuario.id_rol == 1:
+                return response_error("No se puede modificar el estado de un usuario administrador.", http_status=403)
             
             # Actualizar el estado activo
             usuario.activo = activo
@@ -485,14 +488,19 @@ class UsuarioService:
             usuario = Usuario.query.get(usuario_id)
             if not usuario:
                 return response_error("Usuario no encontrado", http_status=404)
-            
+
+            # Validación para evitar eliminar un usuario con id_rol = 1 (Administrador)
+            if usuario.id_rol == 1:
+                return response_error("No se puede eliminar a un usuario administrador.", http_status=403)
+
             usuario.reg_activo = False
             db.session.commit()
             return response_success({"mensaje": "Usuario eliminado exitosamente"}, http_status=200)
-        
+
         except SQLAlchemyError as e:
             db.session.rollback()
             return response_error(f"Error interno del servidor: {str(e)}", http_status=500)
+
         
     @staticmethod
     def restablecer_contraseña(usuario_id):
