@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from utils.metricas import metrica_factura
+import logging
 from datetime import datetime
 from models.parametros import Parametro
 from models.solicitudes import Solicitud
@@ -28,7 +29,10 @@ def obtener_detalle_factura():
             return response_error(f"No se encontró una factura con el número: {no_factura}", http_status=404)
 
         # Calcular los días restantes para el vencimiento
-        fecha_actual = datetime.now()
+        
+        # Crear una fecha manual: año, mes, día, hora, minuto, segundo
+        fecha_actual = datetime(2024, 12, 24, 00, 00, 00)
+        # fecha_actual = datetime.now()
         dias_restantes = (factura.fecha_vence - fecha_actual).days
 
         # Determinar el estado de la solicitud en función de los días restantes
@@ -164,8 +168,8 @@ def solicitar_pago_factura():
         # Enviar correo de confirmación al proveedor
         enviar_correo(data['email'], asunto_confirmacion, contenido_html_confirmacion)
 
-       # Obtener los usuarios con rol "Contador"
-        usuarios_contadores = Usuario.query.join(Rol).filter(Rol.rol == "Contador").all()
+       # Obtener los usuarios con rol "Operador de ICC"
+        usuarios_contadores = Usuario.query.join(Rol).filter(Rol.rol == "Operador de ICC").all()
 
         # Verificar si hay usuarios con el rol
         if not usuarios_contadores:
@@ -174,7 +178,7 @@ def solicitar_pago_factura():
         # Enviar notificación a cada contador
         for contador in usuarios_contadores:
             datos_notificacion = {
-                "nombreContador": contador.nombre_completo,
+                "nombreContador": f"{contador.nombres} {contador.apellidos}",
                 "proveedor": facturas_data['nombre_proveedor'],
                 "noFactura": facturas_data['no_factura'],
                 "montoFactura": f"${float(facturas_data['monto']):.2f}",
@@ -188,6 +192,10 @@ def solicitar_pago_factura():
             # Enviar correo a cada contador
             enviar_correo(contador.email, asunto_notificacion, contenido_html_notificacion)
             print(f"Enviado correo notificacion a {contador.email}")
+            # Actualizar el campo noti_contador de la factura
+            factura_existente.noti_contador = 'S'
+            db.session.commit()
+            logging.info(f"Factura con no_factura {factura_existente.no_factura} marcada como notificada a los contadores.")
 
         return response_success("Solicitud creada exitosamente. Los correos de confirmación y notificación han sido enviados.", http_status=201)
     except Exception as e:

@@ -1,6 +1,6 @@
 def metrica_factura(dias, monto_factura, interes_anual):
     # Calcular interés diario
-    interes_diario = interes_anual / 12 / 30 / 100
+    interes_diario = interes_anual / 365 / 100
     
     # Calcular descuento diario
     descuento_diario = monto_factura * interes_diario

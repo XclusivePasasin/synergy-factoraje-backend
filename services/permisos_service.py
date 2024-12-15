@@ -10,7 +10,7 @@ class PermisosService:
         id_rol = data.get('id_rol')
         nombre = data.get('nombre')
         descripcion = data.get('descripcion')
-        menus = data.get('menus')  # Cambié 'permisos' por 'menus'
+        menus = data.get('menus')  
 
         # Validar que los menús estén presentes en el payload
         if not menus:
@@ -25,12 +25,22 @@ class PermisosService:
                 nuevo_rol = Rol(rol=nombre, nombre=nombre, descripcion=descripcion)
                 db.session.add(nuevo_rol)
                 db.session.commit()
-                id_rol = nuevo_rol.id  # Asignar el nuevo ID del rol creado
+                id_rol = nuevo_rol.id  
+                rol = nuevo_rol
+            else:
+                # Validar si el rol existe
+                rol = Rol.query.get(id_rol)
+                if not rol:
+                    return response_error("ID de rol no válido.", http_status=400)
 
-            # Validar si el rol existe
-            rol = Rol.query.get(id_rol)
-            if not rol:
-                return response_error("ID de rol no válido.", http_status=400)
+                # Actualizar el nombre y la descripción si se proporcionan
+                if nombre:
+                    rol.nombre = nombre
+                    rol.rol = nombre  
+                if descripcion is not None:
+                    rol.descripcion = descripcion
+
+                db.session.commit()  # Guardar los cambios en el rol
 
             # Eliminar permisos existentes para el rol especificado
             Permiso.query.filter_by(id_rol=id_rol).delete()
