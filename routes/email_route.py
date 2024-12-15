@@ -3,6 +3,7 @@ from services.email_service import generar_plantilla, enviar_correo
 from utils.interceptor import token_required
 from utils.response import response_success, response_error
 from models.parametros import Parametro
+from config import Config
 
 email_bp = Blueprint('email', __name__)
 
@@ -48,7 +49,7 @@ def enviar_email():
 
         # Generar dinámicamente el link del botón
         no_factura = datos_plantilla['noFactura']
-        datos_plantilla['linkBoton'] = f"http://localhost:4200/solicitar-pronto-pago?no_factura={no_factura}"
+        datos_plantilla['linkBoton'] = f"{Config.URL_API}/solicitar-pronto-pago?no_factura={no_factura}"
 
         # Generamos el contenido HTML usando la plantilla
         contenido_html = generar_plantilla('correo_template.html', datos_plantilla)
