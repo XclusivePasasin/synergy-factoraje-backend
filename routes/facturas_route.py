@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from utils.metricas import metrica_factura
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from models.parametros import Parametro
 from models.solicitudes import Solicitud
 from models.facturas import Factura
@@ -62,7 +62,7 @@ def obtener_detalle_factura():
                 "nombre_proveedor": factura.nombre_proveedor,
                 "no_factura": factura.no_factura,
                 "dias_restantes": dias_restantes,
-                "fecha_otorga": factura.fecha_otorga.strftime("%d/%m/%Y"),
+                "fecha_otorga": datetime.now().strftime("%d/%m/%Y"),
                 "fecha_vence": factura.fecha_vence.strftime("%d/%m/%Y"),
                 "monto": float(factura.monto),
                 "estado": estado_solicitud,
@@ -125,6 +125,17 @@ def solicitar_pago_factura():
         if dias < 0:
             return response_error("La fecha de vencimiento ha expirado", http_status=409)
 
+
+        # Calcular fecha de otorgamiento (un día después, ajustando para fines de semana)
+        fecha_otorga = fecha_actual + timedelta(days=1 if fecha_actual.weekday() != 4 else 3)
+        # Actualizar el campo fecha_otorga de la factura existente
+        factura_existente.fecha_otorga = fecha_otorga
+        db.session.commit()
+        
+        # Asignar la fecha de otorgamiento a la fecha actual
+        # factura_existente.fecha_otorga = fecha_actual
+        # db.session.commit()
+        
         # Crear la nueva solicitud
         nueva_solicitud = Solicitud(
             nombre_cliente=data['nombre_solicitante'],  
