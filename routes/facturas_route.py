@@ -31,8 +31,8 @@ def obtener_detalle_factura():
         # Calcular los días restantes para el vencimiento
         
         # Crear una fecha manual: año, mes, día, hora, minuto, segundo
-        fecha_actual = datetime(2024, 12, 24, 00, 00, 00)
-        # fecha_actual = datetime.now()
+        # fecha_actual = datetime(2024, 12, 24, 00, 00, 00)
+        fecha_actual = datetime.now()
         dias_restantes = (factura.fecha_vence - fecha_actual).days
 
         # Determinar el estado de la solicitud en función de los días restantes
