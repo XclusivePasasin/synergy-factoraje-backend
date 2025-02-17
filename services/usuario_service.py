@@ -415,7 +415,7 @@ class UsuarioService:
     @staticmethod
     def actualizar_usuario(usuario_id, data):
         """
-        Actualiza la información de un usuario excepto el correo electrónico.
+        Actualiza la información de un usuario, incluyendo el correo electrónico si se proporciona.
         """
         try:
             # Buscar al usuario por su ID
@@ -453,6 +453,16 @@ class UsuarioService:
                     usuario.password = hashed_password
                 elif data['password']:
                     return response_error("La contraseña debe tener al menos 8 caracteres.", http_status=400)
+
+            # Actualizar correo electrónico si se proporciona y es diferente al actual
+            if 'email' in data and data['email'].strip():
+                nuevo_email = data['email'].strip()
+                if nuevo_email != usuario.email:
+                    # Verificar si el nuevo correo ya está en uso por otro usuario
+                    if Usuario.query.filter_by(email=nuevo_email).first():
+                        return response_error("El correo electrónico ya está en uso", http_status=400)
+                    usuario.email = nuevo_email
+            # Si no se proporciona un correo electrónico, no se actualiza y no se devuelve un error
 
             # Guardar los cambios en la base de datos
             db.session.commit()
