@@ -40,7 +40,7 @@ def enviar_email():
             if campo not in datos_plantilla:
                 return response_error(f"El campo {campo} es obligatorio dentro de 'datos'", http_status=400)
 
-         # Agregar variables adicionales a datos_plantilla
+        # Agregar variables adicionales a datos_plantilla
         datos_plantilla.update({
             'nombreEmpresaEncargada': nombre_empresa,
             'nombreEncargadoEmpresa': nombre_encargado,

@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: bc54347b7226
+Revision ID: 0b124d57c284
 Revises: 
-Create Date: 2024-12-02 12:45:23.548428
+Create Date: 2024-12-12 09:57:32.589099
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bc54347b7226'
+revision = '0b124d57c284'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -82,6 +82,9 @@ def upgrade():
     sa.Column('dias_credito', sa.Integer(), nullable=False),
     sa.Column('nombre_proveedor', sa.String(length=255), nullable=True),
     sa.Column('nit', sa.String(length=50), nullable=True),
+    sa.Column('noti_cliente', sa.String(length=1), nullable=False),
+    sa.Column('noti_contador', sa.String(length=1), nullable=False),
+    sa.Column('factura_hash', sa.String(length=255), nullable=False),
     sa.Column('id_proveedor', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
@@ -92,10 +95,6 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('id_rol', sa.Integer(), nullable=False),
     sa.Column('id_menu', sa.Integer(), nullable=False),
-    sa.Column('create_perm', sa.Boolean(), nullable=True),
-    sa.Column('edit_perm', sa.Boolean(), nullable=True),
-    sa.Column('delete_perm', sa.Boolean(), nullable=True),
-    sa.Column('view_perm', sa.Boolean(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['id_menu'], ['menus.id'], onupdate='CASCADE', ondelete='CASCADE'),
@@ -104,7 +103,8 @@ def upgrade():
     )
     op.create_table('usuarios',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('nombre_completo', sa.String(length=255), nullable=False),
+    sa.Column('nombres', sa.String(length=255), nullable=False),
+    sa.Column('apellidos', sa.String(length=255), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
     sa.Column('password', sa.String(length=255), nullable=True),
     sa.Column('temp_password', sa.String(length=255), nullable=True),
@@ -114,6 +114,8 @@ def upgrade():
     sa.Column('id_rol', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('activo', sa.Boolean(), nullable=False),
+    sa.Column('reg_activo', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['id_rol'], ['roles.id'], onupdate='CASCADE', ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
