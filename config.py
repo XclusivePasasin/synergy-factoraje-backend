@@ -14,4 +14,4 @@ class Config:
     MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "True").lower() in ["true", "1", "t"]
     SALT_SECRET = os.getenv('SALT_SECRET') 
     WS_FACTURAJE_URL = os.getenv("WS_FACTURAJE_URL")
-    URL_API = os.getenv("URL_API")
+    URL_API = os.getenv("URL_API_SERVER")
