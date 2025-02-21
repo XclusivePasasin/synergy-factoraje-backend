@@ -33,7 +33,7 @@ def enviar_email():
         campos_datos = [
             'nombreEmpresa', 'noFactura', 'monto', 
             'fechaOtorgamiento', 'fechaVencimiento', 
-            'diasCredito'
+            'diasCredito','factura_hash'
         ]  
         
         for campo in campos_datos:
@@ -48,7 +48,7 @@ def enviar_email():
         })
 
         # Generar dinámicamente el link del botón
-        no_factura = datos_plantilla['noFactura']
+        no_factura = datos_plantilla['factura_hash'] # Enviamos el hash de la factura para realizar la busqueda de forma segura
         datos_plantilla['linkBoton'] = f"{Config.URL_API}/solicitar-pronto-pago?no_factura={no_factura}"
 
         # Generamos el contenido HTML usando la plantilla

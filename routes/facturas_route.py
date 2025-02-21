@@ -11,6 +11,7 @@ from utils.db import db
 from utils.response import response_success, response_error
 from utils.interceptor import token_required
 from services.email_service import *
+from sqlalchemy import *
 
 facturas_bp = Blueprint('factura', __name__)
 
@@ -24,7 +25,9 @@ def obtener_detalle_factura():
             return response_error("El parámetro no_factura es obligatorio", http_status=409)
 
         # Consulta para obtener los detalles de la factura
-        factura = Factura.query.filter_by(no_factura=no_factura).first()
+        factura = Factura.query.filter(
+            or_(Factura.factura_hash == no_factura, Factura.no_factura == no_factura)
+        ).first()
         if not factura:
             return response_error(f"No se encontró una factura con el número: {no_factura}", http_status=404)
 
@@ -61,6 +64,7 @@ def obtener_detalle_factura():
             "factura": {
                 "nombre_proveedor": factura.nombre_proveedor,
                 "no_factura": factura.no_factura,
+                "factura_hash": factura.factura_hash,
                 "dias_restantes": dias_restantes,
                 "fecha_otorga": datetime.now().strftime("%d/%m/%Y"),
                 "fecha_vence": factura.fecha_vence.strftime("%d/%m/%Y"),
@@ -102,7 +106,12 @@ def solicitar_pago_factura():
                 return response_error(f"El campo {campo} en 'factura' es obligatorio", http_status=409)
 
         # Validar que la factura exista por no_factura
-        factura_existente = Factura.query.filter_by(no_factura=facturas_data['no_factura']).first()
+        factura_existente = Factura.query.filter(
+            or_(
+                Factura.factura_hash == facturas_data['no_factura'],
+                Factura.no_factura == facturas_data['no_factura']
+            )
+        ).first()
         if not factura_existente:
             return response_error("La solicitud proporcionada no existe en la base de datos", http_status=409)
 
@@ -166,7 +175,7 @@ def solicitar_pago_factura():
         # Datos para el correo de confirmación al proveedor
         datos_confirmacion = {
             "nombreSolicitante": data['nombre_solicitante'],
-            "noFactura": facturas_data['no_factura'],
+            "noFactura": factura_existente.id,
             "monto": f"${facturas_data['monto']}",
             "fechaSolicitud": fecha_actual.strftime("%d/%m/%Y"),
             "nombreEmpresa": nombre_empresa,
@@ -191,7 +200,7 @@ def solicitar_pago_factura():
             datos_notificacion = {
                 "nombreContador": f"{contador.nombres} {contador.apellidos}",
                 "proveedor": facturas_data['nombre_proveedor'],
-                "noFactura": facturas_data['no_factura'],
+                "noFactura": factura_existente.id,
                 "montoFactura": f"${float(facturas_data['monto']):.2f}",
                 "fechaSolicitud": fecha_actual.strftime("%d/%m/%Y"),
                 "diasCredito": dias,
