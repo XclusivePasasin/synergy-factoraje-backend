@@ -72,6 +72,33 @@ def obtener_token():
     except Exception as e:
         logging.error(f"Error al obtener el token: {e}")
 
+def validar_monto_factoraje(id_proveedor, monto_factura):
+    """
+    Valida si el monto de la factura está dentro del rango permitido por el proveedor.
+    
+    :param id_proveedor: ID del proveedor en la base de datos.
+    :param monto_factura: Monto de la factura a validar.
+    :return: True si el monto está permitido, False en caso contrario.
+    """
+    with app.app_context():
+        # Buscar el proveedor en la base de datos
+        proveedor = ProveedorCalificado.query.filter_by(id=id_proveedor).first()
+
+        if not proveedor:
+            logging.warning(f"No se encontró un proveedor con ID {id_proveedor}.")
+            return False
+
+        # Validar si el monto está dentro del rango permitido
+        if proveedor.monto_minimo_factoraje <= monto_factura <= proveedor.monto_maximo_factoraje:
+            return True
+        else:
+            logging.warning(
+                f"El monto {monto_factura} no cumple con los requisitos de factoraje del proveedor {proveedor.razon_social}. "
+                f"Rango Permitido: [{proveedor.monto_minimo_factoraje} - {proveedor.monto_maximo_factoraje}]"
+            )
+            return False
+
+
 # Función para almacenar facturas
 def almacenar_facturas():
     # Nueva URL del endpoint local
@@ -111,6 +138,15 @@ def almacenar_facturas():
                             logging.info(f"Factura con no_factura {factura['no_factura']} ya existe. Se omite.")
                             continue
 
+                        # Obtener ID del proveedor desde la factura
+                        id_proveedor = factura["id"]
+                        monto_factura = float(factura["Monto"])
+
+                        # Validar el factoraje antes de continuar
+                        if not validar_monto_factoraje(id_proveedor, monto_factura):
+                            logging.info(f"Factura {factura['no_factura']} no cumple con los requisitos de factoraje y será omitida.")
+                            continue  # Omitir la factura si no cumple con el rango permitido
+
                         # Calcular fecha de otorgamiento (un día después, ajustando para fines de semana)
                         fecha_otorga = fecha_actual + timedelta(days=1 if fecha_actual.weekday() != 4 else 3)
                         logging.info(f"Fecha de otorgamiento calculada: {fecha_otorga}")
@@ -118,7 +154,7 @@ def almacenar_facturas():
                         # Crear el objeto Factura
                         nueva_factura = Factura(
                             no_factura=factura["no_factura"],
-                            monto=float(factura["Monto"]),
+                            monto=monto_factura,
                             fecha_emision=datetime.fromisoformat(factura["fecha_emision"].split(" ")[0]),
                             fecha_vence=datetime.fromisoformat(factura["fecha_vence"].split(" ")[0]),
                             fecha_otorga=fecha_otorga,
@@ -126,7 +162,7 @@ def almacenar_facturas():
                             nombre_proveedor=factura["razon_social"],
                             nit=factura["nit"],
                             factura_hash=generar_hash(factura["no_factura"]),
-                            id_proveedor=1  
+                            id_proveedor=id_proveedor  # Asignar correctamente el ID del proveedor
                         )
                         nuevas_facturas.append(nueva_factura)
 
