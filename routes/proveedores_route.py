@@ -6,7 +6,7 @@ import logging
 
 proveedor_bp = Blueprint('proveedor', __name__)
 
-@proveedor_bp.route('/proveedor/registrar', methods=['POST'])
+@proveedor_bp.route('/registrar-proveedor', methods=['POST'])
 @token_required
 def registrar_proveedor():
     try:
@@ -31,7 +31,7 @@ def registrar_proveedor():
     except Exception as e:
         return response_error("Error interno del servidor", http_status=500)
 
-@proveedor_bp.route('/proveedor/obtener-proveedor', methods=['GET'])
+@proveedor_bp.route('/obtener-proveedor', methods=['GET'])
 @token_required
 def obtener_proveedor():
     try:
@@ -51,7 +51,7 @@ def obtener_proveedor():
         logging.error(f"Error inesperado al obtener proveedor: {e}", exc_info=True)
         return response_error("Error interno del servidor", http_status=500)
     
-@proveedor_bp.route('/proveedor/actualizar', methods=['PUT'])
+@proveedor_bp.route('/actualizar-proveedor', methods=['PUT'])
 @token_required
 def modificar_proveedor():
     try:
@@ -73,7 +73,7 @@ def modificar_proveedor():
     except Exception as e:
         return response_error("Error interno del servidor", http_status=500)
     
-@proveedor_bp.route('/proveedor/eliminar', methods=['DELETE'])
+@proveedor_bp.route('/eliminar-proveedor', methods=['DELETE'])
 @token_required
 def suprimir_proveedor():
     try:
@@ -93,12 +93,76 @@ def suprimir_proveedor():
         logging.error(f"Error inesperado al eliminar proveedor: {e}", exc_info=True)
         return response_error("Error interno del servidor", http_status=500)
 
-@proveedor_bp.route('/proveedor/listar', methods=['GET'])
+@proveedor_bp.route('/listar-proveedores', methods=['GET'])
 @token_required
 def obtener_proveedores():
     try:
-        proveedores = listar_proveedores()
-        return response_success(proveedores, "Lista de proveedores obtenida exitosamente")
+        # Obtener los parámetros de consulta
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+        razon_social = request.args.get('razon_social')
+        nrc = request.args.get('nrc')
+        nit = request.args.get('nit')
+        correo_electronico = request.args.get('correo_electronico')
+        cuenta_bancaria = request.args.get('cuenta_bancaria')
+        banco = request.args.get('banco')
+        nombre_contacto = request.args.get('nombre_contacto')
+        telefono = request.args.get('telefono')
+
+        # Construir la consulta base
+        query = ProveedorCalificado.query
+
+        # Aplicar filtros opcionales
+        if razon_social:
+            query = query.filter(ProveedorCalificado.razon_social.ilike(f"%{razon_social}%"))
+        if nrc:
+            query = query.filter(ProveedorCalificado.nrc.ilike(f"%{nrc}%"))
+        if nit:
+            query = query.filter(ProveedorCalificado.nit.ilike(f"%{nit}%"))
+        if correo_electronico:
+            query = query.filter(ProveedorCalificado.correo_electronico.ilike(f"%{correo_electronico}%"))
+        if cuenta_bancaria:
+            query = query.filter(ProveedorCalificado.cuenta_bancaria.ilike(f"%{cuenta_bancaria}%"))
+        if banco:
+            query = query.filter(ProveedorCalificado.banco.ilike(f"%{banco}%"))
+        if nombre_contacto:
+            query = query.filter(ProveedorCalificado.nombre_contacto.ilike(f"%{nombre_contacto}%"))
+        if telefono:
+            query = query.filter(ProveedorCalificado.telefono.ilike(f"%{telefono}%"))
+
+        # Obtener el total de proveedores antes de la paginación
+        total_proveedores = query.count()
+
+        # Aplicar paginación
+        proveedores = query.offset((page - 1) * per_page).limit(per_page).all()
+
+        # Construir la respuesta
+        response_data = {
+            "current_page": page,
+            "per_page": per_page,
+            "total_pages": (total_proveedores + per_page - 1) // per_page,
+            "proveedores": [
+                {
+                    "id": proveedor.id,
+                    "razon_social": proveedor.razon_social,
+                    "nrc": proveedor.nrc,
+                    "nit": proveedor.nit,
+                    "correo_electronico": proveedor.correo_electronico,
+                    "cuenta_bancaria": proveedor.cuenta_bancaria,
+                    "min_factoring": float(proveedor.min_factoring) if proveedor.min_factoring else None,
+                    "max_factoring": float(proveedor.max_factoring) if proveedor.max_factoring else None,
+                    "banco": proveedor.banco,
+                    "codigo_banco": proveedor.codigo_banco,
+                    "nombre_contacto": proveedor.nombre_contacto,
+                    "telefono": proveedor.telefono,
+                    "created_at": proveedor.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    "updated_at": proveedor.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+                }
+                for proveedor in proveedores
+            ]
+        }
+
+        return response_success(response_data, "Lista de proveedores obtenida exitosamente")
 
     except Exception as e:
         logging.error(f"Error inesperado al listar proveedores: {e}", exc_info=True)
