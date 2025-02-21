@@ -880,3 +880,235 @@ su factura está disponible para aplicar a pronto pago.
 }
 
 ```
+
+## Endpoints Proveedores Calificados
+
+### **Crear Proveedor**
+**Endpoint:** `POST /api/proveedor/registrar`
+**Descripción:** Crea un nuevo proveedor en el sistema con la información proporcionada.
+
+**Request Body:**
+```json
+{
+    "id": "PROV12345",
+    "razon_social": "Proveedor S.A. de C.V.",
+    "nrc": "123456-7",
+    "nit": "0614-290120-101-2",
+    "correo_electronico": "contacto@proveedor.com",
+    "cuenta_bancaria": "1234567890123456",
+    "min_factoring": 1000.50,
+    "max_factoring": 50000.75,
+    "banco": "Banco Nacional",
+    "codigo_banco": "002",
+    "nombre_contacto": "Juan Pérez",
+    "telefono": "+503 2258-1234"
+}
+
+```
+
+**Response (success):**
+```json
+{
+    "code": 0,
+    "data": {
+        "proveedor": {
+            "banco": "Banco de América Central",
+            "codigo_banco": "0",
+            "correo_electronico": "clobitech@clobitech.com",
+            "cuenta_bancaria": "1234567890",
+            "id": 1,
+            "max_factoring": 5000.0,
+            "min_factoring": 1000.0,
+            "nombre_contacto": "Juan Pérez",
+            "nit": "NIT456789123",
+            "nrc": "NRC12345",
+            "razon_social": "Clobi Technologies S.A. de C.V.",
+            "telefono": "555-12345",
+            "created_at": "2023-01-01 12:00:00",
+            "updated_at": "2023-01-01 12:00:00"
+        }
+    },
+    "message": "Proveedor creado exitosamente"
+}
+```
+
+**Response (error):**
+```json
+{
+    "code": 1,
+    "data": null,
+    "message": "Faltan los campos obligatorios:"
+}
+```
+
+### **Listar todos los proveedores**
+**Endpoint:** `GET /api/proveedor/listar`
+**Descripción:** Devuelve una lista de todos los proveedores en el sistema.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+**Response:**
+```json
+{
+    "code": 0,
+    "data": [
+        "proveedores": [
+            {
+                "banco": "Banco de América Central",
+                "codigo_banco": "0",
+                "correo_electronico": "clobitech@clobitech.com",
+                "cuenta_bancaria": "1234567890",
+                "id": 1,
+                "max_factoring": 5000.0,
+                "min_factoring": 1000.0,
+                "nombre_contacto": "Juan Pérez",
+                "nit": "NIT456789123",
+                "nrc": "NRC12345",
+                "razon_social": "Clobi Technologies S.A. de C.V.",
+                "telefono": "555-12345",
+                "created_at": "2023-01-01 12:00:00",
+                "updated_at": "2023-01-01 12:00:00"
+            },
+            {
+                "banco": "Banco de América Central",
+                "codigo_banco": "0",
+                "correo_electronico": "clobitech@clobitech.com",
+                "cuenta_bancaria": "1234567890",
+                "id": 1,
+                "max_factoring": 5000.0,
+                "min_factoring": "1000.0",
+                "nombre_contacto": "Juan Pérez",
+                "nit": "NIT456789123",
+                "nrc": "NRC12345",
+                "razon_social": "Clobi Technologies S.A. de C.V.",
+                "telefono": "555-12345",
+                "created_at": "2023-01-01 12:00:00",
+                "updated_at": "2023-01-01 12:00:00"
+            }
+        ]   
+    ],
+    "message": "Lista de proveedores obtenida exitosamente"
+}
+```
+
+### **Eliminar un proveedor**
+**Endpoint:** `DELETE /api/proveedor/eliminar`
+**Descripción:** Elimina un proveedor del sistema.
+
+**Query Parameters (Obligatorio):**
+- 'id': ID del proveedor que se desea eliminar.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Response:**
+```json
+{
+    "code": 0,
+    "data": {
+        "mensaje": "Proveedor eliminado exitosamente"
+    },
+    "message": "Proveedor eliminado exitosamente"
+}
+```
+
+### **Actualizar un proveedor**
+**Endpoint:** `PUT /api/proveedor/actualizar`
+**Descripción:** Actualiza los datos de un proveedor existente.
+
+**Query Parameters (Obligatorio):**
+- 'id': ID del proveedor que se desea actualizar.
+
+**Request Body:**
+```json
+{
+    "id": "PROV12345",
+    "razon_social": "Proveedor S.A. de C.V.",
+    "nrc": "123456-7",
+    "nit": "0614-290120-101-2",
+    "correo_electronico": "contacto@proveedor.com",
+    "cuenta_bancaria": "1234567890123456",
+    "min_factoring": 1000.50,
+    "max_factoring": 50000.75,
+    "banco": "Banco Nacional",
+    "codigo_banco": "002",
+    "nombre_contacto": "Juan Pérez",
+    "telefono": "+503 2258-1234"
+}
+```
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Response:**
+```json
+{
+    "code": 0,
+    "data": {
+        "proveedor": {
+            "banco": "Banco de América Central",
+            "codigo_banco": "0",
+            "correo_electronico": "clobitech@clobitech.com",
+            "cuenta_bancaria": "1234567890",
+            "id": 1,
+            "max_factoring": 5000.0,
+            "min_factoring": 1000.0,
+            "nombre_contacto": "Juan Pérez",
+            "nit": "NIT456789123",
+            "nrc": "NRC12345",
+            "razon_social": "Clobi Technologies S.A. de C.V.",
+            "telefono": "+503 2258-1234"
+        }
+    },
+    "message": "Proveedor actualizado exitosamente"
+}
+```
+
+### **Obtener detalles de un proveedor**
+**Endpoint:** `GET /api/proveedor/obtener-proveedor`
+**Descripción:** Devuelve los detalles de un proveedor específico.
+
+**Query Parameters (Obligatorio):**
+- 'id': ID del proveedor que se desea obtener.
+
+**Headers:**
+```json
+{
+    "Authorization": "Bearer <access_token>"
+}
+```
+
+**Response:**
+```json
+{
+    "code": 0,
+    "data": {
+        "proveedor": {
+            "banco": "Banco de América Central",
+            "codigo_banco": "0",
+            "correo_electronico": "clobitech@clobitech.com",
+            "cuenta_bancaria": "1234567890",
+            "id": 1,
+            "max_factoring": 5000.0,
+            "min_factoring": 1000.0,
+            "nombre_contacto": "Juan Pérez",
+            "nit": "NIT456789123",
+            "nrc": "NRC12345",
+            "razon_social": "Clobi Technologies S.A. de C.V.",
+            "telefono": "+503 2258-1234"
+        }
+    }
+    "message": "Proveedor obtenido exitosamente"
+}
