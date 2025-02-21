@@ -198,27 +198,3 @@ def eliminar_proveedor(id):
         db.session.rollback()
         raise ValueError("Ha ocurrido un error inesperado al intentar eliminar el proveedor.")
     
-def listar_proveedores():
-    proveedores = ProveedorCalificado.query.all()
-    
-    return {
-        "proveedores": [
-            {
-                "id": proveedor.id,
-                "razon_social": proveedor.razon_social,
-                "nrc": proveedor.nrc,
-                "nit": proveedor.nit,
-                "correo_electronico": proveedor.correo_electronico,
-                "cuenta_bancaria": proveedor.cuenta_bancaria,
-                "min_factoring": float(proveedor.min_factoring) if proveedor.min_factoring else None,
-                "max_factoring": float(proveedor.max_factoring) if proveedor.max_factoring else None,
-                "banco": proveedor.banco,
-                "codigo_banco": proveedor.codigo_banco,
-                "nombre_contacto": proveedor.nombre_contacto,
-                "telefono": proveedor.telefono,
-                "created_at": proveedor.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                "updated_at": proveedor.updated_at.strftime("%Y-%m-%d %H:%M:%S")
-            }
-            for proveedor in proveedores
-        ]
-    }
