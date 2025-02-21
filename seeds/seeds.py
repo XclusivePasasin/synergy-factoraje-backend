@@ -211,7 +211,7 @@ def seed_facturas():
     with current_app.app_context():
         facturas = [
             {
-                "no_factura": "DTE-03M001P001-000000000000580",
+                "no_factura": "DTE-03M001P001-000000000000587",
                 "monto": 1806.87,
                 "fecha_emision": "2024-11-30 00:00:00",
                 "fecha_vence": "2025-01-30 00:00:00",  
