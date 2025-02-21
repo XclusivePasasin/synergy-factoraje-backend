@@ -207,6 +207,7 @@ def enviar_correos_facturas_no_notificadas():
                 "datos": {
                     "nombreEmpresa": proveedor.razon_social,
                     "noFactura": factura.no_factura,
+                    "factura_hash": factura.factura_hash,
                     "monto": str(factura.monto),
                     "fechaOtorgamiento": factura.fecha_otorga.strftime("%d/%m/%Y"),
                     "fechaVencimiento": factura.fecha_vence.strftime("%d/%m/%Y"),
