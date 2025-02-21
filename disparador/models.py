@@ -14,14 +14,14 @@ class Factura(db.Model):
     noti_cliente = db.Column(db.String(1), default='N', nullable=False)  
     noti_contador = db.Column(db.String(1), default='N', nullable=False)  
     factura_hash = db.Column(db.String(255), nullable=False)
-    id_proveedor = db.Column(db.Integer, db.ForeignKey('proveedores_calificados.id', ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
+    id_proveedor = db.Column(db.String(50), db.ForeignKey('proveedores_calificados.id', ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
     proveedor = db.relationship('ProveedorCalificado', backref='facturas')
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
 class ProveedorCalificado(db.Model):
     __tablename__ = 'proveedores_calificados'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(50), primary_key=True)
     razon_social = db.Column(db.String(255), nullable=False)
     nrc = db.Column(db.String(50), nullable=False)
     nit = db.Column(db.String(50))
@@ -31,5 +31,7 @@ class ProveedorCalificado(db.Model):
     nombre_contacto = db.Column(db.String(255))
     correo_electronico = db.Column(db.String(255))
     telefono = db.Column(db.String(50))
+    codigo_banco = db.Column(db.String(20), nullable=False, default="0")
+    banco = db.Column(db.String(100), default='Banco desconocido')  
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
