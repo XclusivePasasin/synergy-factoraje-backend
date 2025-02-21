@@ -22,6 +22,7 @@ su factura está disponible para aplicar a pronto pago.
     "datos": {
         "nombreEmpresa": "Clobi Technologies S.A. de C.V.",
         "noFactura": "FAC001",
+        "factura_hash": "CCGSGTSJXM",
         "monto": "10000.00",
         "fechaOtorgamiento": "20/11/2024",
         "fechaVencimiento": "19/02/2025",
@@ -61,6 +62,7 @@ su factura está disponible para aplicar a pronto pago.
             "iva": 4.29,
             "monto": 1500.0,
             "no_factura": "FAC001",
+            "factura_hash": "CCGSGTSJXM",
             "nombre_proveedor": "TechNova Solutions S.A.",
             "subtotal": 37.29,
             "total": 1462.71
@@ -101,6 +103,14 @@ su factura está disponible para aplicar a pronto pago.
        "cargo": "Programador",
        "email": "eliazar.rebollo23@gmail.com"
     }
+}
+```
+**Response (error):**
+```json
+{
+    "code": 1,
+    "data": null,
+    "message": "La solicitud proporcionada no existe en la base de datos"
 }
 ```
 
@@ -884,7 +894,7 @@ su factura está disponible para aplicar a pronto pago.
 ## Endpoints Proveedores Calificados
 
 ### **Crear Proveedor**
-**Endpoint:** `POST /api/proveedor/registrar`
+**Endpoint:** `POST /api/proveedor/registrar-proveedor`
 **Descripción:** Crea un nuevo proveedor en el sistema con la información proporcionada.
 
 **Request Body:**
@@ -942,7 +952,7 @@ su factura está disponible para aplicar a pronto pago.
 ```
 
 ### **Listar todos los proveedores**
-**Endpoint:** `GET /api/proveedor/listar`
+**Endpoint:** `GET /api/proveedor/listar-proveedores`
 **Descripción:** Devuelve una lista de todos los proveedores en el sistema.
 
 **Headers:**
@@ -951,6 +961,19 @@ su factura está disponible para aplicar a pronto pago.
     "Authorization": "Bearer <access_token>"
 }
 ```
+
+query params:
+- 'page': Número de página (ejemplo: `1`).
+- 'per_page': Cantidad de elementos por página (ejemplo: `10`).
+- 'razon_social': Filtrar por razón social.
+- 'nrc': Filtrar por número de cuenta bancaria.
+- 'nit': Filtrar por número de identificación tributaria.
+- 'correo_electronico': Filtrar por correo electrónico.
+- 'cuenta_bancaria': Filtrar por cuenta bancaria.
+- 'banco': Filtrar por banco.
+- 'nombre_contacto': Filtrar por nombre del contacto.
+- 'telefono': Filtrar por teléfono.
+
 **Response:**
 ```json
 {
@@ -996,7 +1019,7 @@ su factura está disponible para aplicar a pronto pago.
 ```
 
 ### **Eliminar un proveedor**
-**Endpoint:** `DELETE /api/proveedor/eliminar`
+**Endpoint:** `DELETE /api/proveedor/eliminar-proveedor`
 **Descripción:** Elimina un proveedor del sistema.
 
 **Query Parameters (Obligatorio):**
@@ -1020,8 +1043,8 @@ su factura está disponible para aplicar a pronto pago.
 }
 ```
 
-### **Actualizar un proveedor**
-**Endpoint:** `PUT /api/proveedor/actualizar`
+### **Actualizar un proveedor**w
+**Endpoint:** `PUT /api/proveedor/actualizar-proveedor`
 **Descripción:** Actualiza los datos de un proveedor existente.
 
 **Query Parameters (Obligatorio):**

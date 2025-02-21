@@ -23,6 +23,7 @@ from routes.solicitudes_route import solicitud_bp
 from routes.desembolsos_route import desembolsos_bp
 from routes.permisos_route import permisos_bp
 from routes.web_service import wsFactoraje_bp
+from routes.proveedores_route import proveedor_bp
 # Cors
 from flask_cors import CORS
 
@@ -46,6 +47,7 @@ def create_app():
     app.register_blueprint(desembolsos_bp, url_prefix='/api/desembolso')
     app.register_blueprint(permisos_bp, url_prefix='/api/permiso')
     app.register_blueprint(wsFactoraje_bp, url_prefix='/api/wsFactoraje')
+    app.register_blueprint(proveedor_bp, url_prefix='/api/proveedor')
 
     return app
 
