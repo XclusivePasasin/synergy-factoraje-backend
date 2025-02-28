@@ -49,7 +49,7 @@ def obtener_desembolsos():
             "current_page": paginated_query.page,
             "per_page": paginated_query.per_page,
             "total_pages": paginated_query.pages,
-            "solicitudes": [
+            "desembolsos": [
                 {
                     "id": desembolso.id,
                     "fecha_desembolso": desembolso.fecha_desembolso.isoformat(),
