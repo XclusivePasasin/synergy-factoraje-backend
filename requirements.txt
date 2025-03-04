@@ -10,4 +10,5 @@ mysql-connector-python
 python-dotenv
 requests
 Jinja2
+pandas
 

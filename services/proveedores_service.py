@@ -48,7 +48,7 @@ def crear_proveedor(data):
                 "created_at": proveedor.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 "updated_at": proveedor.updated_at.strftime("%Y-%m-%d %H:%M:%S")
             }
-            }
+        }
 
 def validar_datos_proveedor(data):
     """ Realiza validaciones sobre los datos del proveedor antes de crearlo. """

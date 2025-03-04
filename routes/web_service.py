@@ -5,8 +5,8 @@ wsFactoraje_bp = Blueprint('wsFactoraje', __name__)
 # Datos de ejemplo proporcionados
 facturas = [
     {
-        "id": "PL0001",
-        "razon_social": "2V TRADING EL SALVADOR, S.A. DE C.V",
+        "id": "AL0008",
+        "razon_social": "ENMANUEL S.A. DE C.V.",
         "nrc": "238413-2",
         "nit": "0614-271014-103-8",
         "correo_electronico": "test@gmail.com",
@@ -19,8 +19,8 @@ facturas = [
         "fecha_vence": "2024-01-30 00:00:00.0000000"
     },
     {
-        "id": "PL0001",
-        "razon_social": "2V TRADING EL SALVADOR, S.A. DE C.V",
+        "id": "AL0008",
+        "razon_social": "ENMANUEL S.A. DE C.V.",
         "nrc": "238413-2",
         "nit": "0614-271014-103-8",
         "correo_electronico": "test@gmail.com",
@@ -33,8 +33,8 @@ facturas = [
         "fecha_vence": "2025-01-12 00:00:00.0000000"
     },
     {
-        "id": "PL0001",
-        "razon_social": "2V TRADING EL SALVADOR, S.A. DE C.V",
+        "id": "AL0008",
+        "razon_social": "ENMANUEL S.A. DE C.V.",
         "nrc": "238413-2",
         "nit": "0614-271014-103-8",
         "correo_electronico": "test@gmail.com",
@@ -47,8 +47,8 @@ facturas = [
         "fecha_vence": "2025-01-30 00:00:00.0000000"
     },
     {
-        "id": "PL0001",
-        "razon_social": "2V TRADING EL SALVADOR, S.A. DE C.V",
+        "id": "AL0008",
+        "razon_social": "ENMANUEL S.A. DE C.V.",
         "nrc": "238413-2",
         "nit": "0614-271014-103-8",
         "correo_electronico": "test@gmail.com",
@@ -61,7 +61,7 @@ facturas = [
         "fecha_vence": "2025-01-30 00:00:00.0000000"
     },
     {
-        "id": "PL0003",
+        "id": "AL0008",
         "razon_social": "BRENNTAG EL SALVADOR, S.A. DE C.V.",
         "nrc": "262-3",
         "nit": "0614-150277-002-9",

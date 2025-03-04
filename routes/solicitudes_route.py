@@ -1,5 +1,5 @@
 from datetime import datetime, time
-from flask import Flask, request, Blueprint
+from flask import Flask, request, Blueprint, send_file
 from models.parametros import Parametro
 from utils.db import db
 from models.solicitudes import Solicitud
@@ -8,8 +8,11 @@ from models.comentarios import Comentario
 from models.proveedores_calificados import ProveedorCalificado
 from sqlalchemy import and_, or_
 from utils.response import response_success, response_error
+from services.solicitudes_services import actualizar_solicitudes, exportar_solicitudes
 from utils.interceptor import token_required
 from services.email_service import *
+from utils.bitacora import bitacora
+
 
 solicitud_bp = Blueprint('solicitud', __name__)
 
@@ -139,6 +142,7 @@ def obtener_detalle_solicitud():
     
 @solicitud_bp.route('/aprobar', methods=['PUT'])
 @token_required
+@bitacora(modulo="Solicitudes", accion="Aprobación de solicitud")  # Decorador que registra la bitácora
 def aprobar_solicitud():
     try:
         solicitud_id = request.args.get('id', type=int)
@@ -243,6 +247,7 @@ def aprobar_solicitud():
 
 @solicitud_bp.route('/desaprobar', methods=['PUT'])
 @token_required
+@bitacora(modulo="Solicitudes", accion="Desaprobación de solicitud")  # Decorador que registra la bitácora
 def desaprobar_solicitud():
     try:
         # Obtener el ID de la solicitud desde los query parameters
@@ -389,3 +394,30 @@ def panel_solicitudes():
         return response_success(response_data, "Métricas de solicitudes obtenidas con éxito")
     except Exception as e:
         return response_error(f"Error al procesar la solicitud: {str(e)}", http_status=500)
+
+
+@solicitud_bp.route('/procesar-solicitudes', methods=['POST'])
+@token_required
+def procesar_solicitudes_route():
+    """
+    Recibe una lista de valores unicos y llama al servicio para procesar las solicitudes y exportar la información en un archivo de Excel.
+    """
+    try:
+        data = request.get_json()
+        lista_ids = data.get("ids", [])
+
+        # Actualizar las solicitudes estado a 'Procesada'
+        cantidad_actualizadas, error = actualizar_solicitudes(lista_ids)
+        if error:
+            return response_error(error, http_status=400)
+
+        # Exportar las solicitudes en un formato Excel
+        archivo = exportar_solicitudes(lista_ids)
+        
+        return response_success(
+            {"solicitudes_actualizadas": cantidad_actualizadas}, 
+            "Solicitudes actualizadas y archivo generado correctamente"
+        ), archivo
+
+    except Exception as e:
+        return response_error(f"Error en la ruta: {str(e)}", http_status=500)

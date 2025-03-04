@@ -196,6 +196,7 @@ def enviar_correos_facturas_no_notificadas():
         facturas_no_notificadas = Factura.query.filter_by(noti_cliente='N').all()
 
         for factura in facturas_no_notificadas:
+            # Se realiza una busqueda del correo electronico a traves de la tabla de proveedores calificados para obtenerlo y enviarle la informacion de la factura.
             proveedor = ProveedorCalificado.query.filter_by(id=factura.id_proveedor).first()
             if not proveedor or not proveedor.correo_electronico:
                 logging.warning(f"No se encontró correo para el proveedor de la factura {factura.no_factura}")
